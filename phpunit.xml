@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/codeigniter4/framework/system/Test/bootstrap.php"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true"
+         cacheDirectory=".phpunit.cache">
+    <!--
+        This package ships no `app/` skeleton of its own, so the CI4 test
+        bootstrap (which still loads Composer's autoloader first) falls back
+        to the `Config\*` classes bundled inside `vendor/codeigniter4/framework/app/Config`.
+        That bundled `Config\Database` already defines a `tests` group backed
+        by SQLite3 `:memory:` and forces `defaultGroup = 'tests'` whenever
+        `ENVIRONMENT === 'testing'` (set by the bootstrap itself), which is
+        exactly the CI4-recommended setup for testing a standalone package
+        against an in-memory DB — no extra `tests/_support/Config` overrides
+        are needed. See tests/Database/DatabaseProviderTest.php.
+    -->
+    <testsuites>
+        <testsuite name="Tests">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+    <!--
+        Coverage reporting. Driven by whatever coverage driver is available
+        (Xdebug or PCOV); when neither is installed, PHPUnit skips coverage
+        collection with a warning and the test run itself still passes —
+        coverage is diagnostic, never a requirement for `composer test`.
+
+        Target thresholds (tracked manually; no coverage threshold element
+        enforces them automatically, since that would fail the whole suite
+        locally whenever a dev machine has no coverage driver):
+          - Core/ + Registry/ + National/ (the framework-free engine): >= 90%
+          - Global (src/ as a whole): >= 80%
+    -->
+    <coverage>
+        <report>
+            <clover outputFile="build/logs/clover.xml"/>
+        </report>
+    </coverage>
+</phpunit>

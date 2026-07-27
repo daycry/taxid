@@ -1,0 +1,31 @@
+includes:
+    - vendor/codeigniter/phpstan-codeigniter/extension.neon
+
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    tmpDir: build/phpstan
+    # This package ships no `app/` skeleton of its own (see phpunit.xml):
+    # at runtime, CI4's Test bootstrap points `Config\*` at the framework's
+    # bundled `app/Config` (vendor/codeigniter4/framework/app/Config) via
+    # CONFIGPATH, not Composer's autoloader. The codeigniter/phpstan-codeigniter
+    # extension's Model/Services return-type resolution actually instantiates
+    # `Config\Database`/`Config\Services` at analysis time, so those classes
+    # must be genuinely loaded into the PHP runtime -- the same CI4 Test
+    # bootstrap phpunit.xml already uses does exactly that.
+    bootstrapFiles:
+        - vendor/codeigniter4/framework/system/Test/bootstrap.php
+    codeigniter:
+        # `Daycry\TaxId\Config\Services::taxid()` is this package's own CI4
+        # service factory (auto-discovered at runtime via CI4's
+        # `Config\Modules::$discoverInComposer`); the extension only knows
+        # about `Config\Services` out of the box, so `service('taxid')`'s
+        # return type must be taught explicitly here.
+        additionalServices:
+            - Daycry\TaxId\Config\Services
+        # Default is `%currentWorkingDirectory%/tmp`, which would create an
+        # untracked `tmp/` directory at the repo root. Reuse the already
+        # gitignored `build/` directory instead.
+        schemaCacheDirectory: %currentWorkingDirectory%/build/phpstan/ci-schema

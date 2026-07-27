@@ -1,0 +1,58 @@
+{
+    "name": "daycry/taxid",
+    "description": "Tax identification number library for CodeIgniter 4 (validation, parsing, formatting and taxpayer resolution) covering ~90 jurisdictions, usable standalone too.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "taxid",
+        "tin",
+        "vat",
+        "vies",
+        "codeigniter4",
+        "codeigniter",
+        "validation",
+        "nif",
+        "cif"
+    ],
+    "authors": [
+        {
+            "name": "Daycry",
+            "email": "daycry9@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "ext-simplexml": "*"
+    },
+    "require-dev": {
+        "codeigniter/phpstan-codeigniter": "^2.1",
+        "codeigniter4/framework": "^4.6",
+        "friendsofphp/php-cs-fixer": "^3",
+        "phpstan/phpstan": "^2",
+        "phpunit/phpunit": "^11"
+    },
+    "autoload": {
+        "psr-4": {
+            "Daycry\\TaxId\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "8.3.20"
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit --no-coverage",
+        "test:coverage": "phpunit --coverage-clover build/logs/clover.xml",
+        "analyze": "phpstan analyse",
+        "cs": "php-cs-fixer fix --dry-run --diff"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
