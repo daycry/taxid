@@ -1,18 +1,13 @@
-*/config/development
-*/logs/log-*.php
-!*/logs/index.html
-*/cache/*
-!system/cache/*
-!*/cache/index.html
-!*/cache/.htaccess
-
-user_guide_src/build/*
-user_guide_src/cilexer/build/*
-user_guide_src/cilexer/dist/*
-user_guide_src/cilexer/pycilexer.egg-info/*
-
-#codeigniter 3
-application/logs/*
-!application/logs/index.html
-!application/logs/.htaccess
+# Composer
 /vendor/
+composer.phar
+.composer/
+# Library convention: do not commit the lock file; CI uses `composer update`
+composer.lock
+
+# PHPUnit
+.phpunit.cache
+build/
+
+# PHP-CS-Fixer
+.php-cs-fixer.cache
