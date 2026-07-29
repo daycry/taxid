@@ -2,8 +2,11 @@
 
 **94 jurisdictions, 146 schemes, 96 of them with a verified check digit.**
 
-This file is generated from `src/Registry/data/countries.php`; `php spark taxid:countries` prints the
-same thing from the live registry. If the two ever disagree, believe the command.
+This table is maintained by hand, and kept honest by a test:
+`tests/Registry/CountriesDocIsInSyncTest.php` compares every cell of every row against
+`src/Registry/data/countries.php` in both directions, checks the count line above, and checks the row
+order — so the two cannot drift without failing CI. Inside a CodeIgniter 4 application,
+`php spark taxid:countries` prints the same thing from the live registry.
 
 Reading the table:
 
