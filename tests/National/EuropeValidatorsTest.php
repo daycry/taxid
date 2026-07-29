@@ -130,7 +130,12 @@ final class EuropeValidatorsTest extends TestCase
 
         yield 'GR AFM' => ['GR', 'afm', ['094259216'], ['094259217']];
 
-        yield 'IE VAT' => ['IE', 'vat', ['1234567T', '1234567FA'], ['1234567A', '1234567FB']];
+        yield 'IE VAT' => [
+            'IE',
+            'vat',
+            ['1234567T', '1234567FA', '1A23456W'],
+            ['1234567A', '1234567FB', '1A23456U', '1A23456T'],
+        ];
 
         yield 'GB VAT'  => ['GB', 'vat', ['123456782', 'GD001', 'HA599'], ['123456783', 'GD501']];
         yield 'GB NINO' => ['GB', 'nino', ['AB123456C'], ['DB123456C', 'AB123456E']];
@@ -316,6 +321,37 @@ final class EuropeValidatorsTest extends TestCase
 
         self::assertFalse($result->isValid());
         self::assertSame('bad_length', $result->errorCode());
+    }
+
+    /**
+     * The *letter* form of that same individual style is fully reachable —
+     * `1A23456W` contains nothing the `IllegalCharacters` gate objects to — and
+     * until 1.2.0 this class computed its check letter wrongly.
+     *
+     * The leading digit moves to the END of the checksum body: it reads as
+     * `0` + the five middle digits + that leading digit. The old code built
+     * `0` + five digits and stopped, so the leading digit never entered the sum
+     * at all and the weights then ran off the end of a six-character string.
+     * Both values below share a body; only one has the right letter, so a
+     * regression to the old construction fails this test rather than merely
+     * warning.
+     */
+    public function testIrishOldIndividualStyleMovesTheLeadingDigitToTheEnd(): void
+    {
+        // Body 0234561: 0·8 + 2·7 + 3·6 + 4·5 + 5·4 + 6·3 + 1·2 = 92, 92 mod 23 = 0 -> W.
+        self::assertTrue($this->taxid->isValid('1A23456W', 'IE', 'vat'));
+
+        // U is what dropping the leading digit produces. It must not be accepted.
+        self::assertFalse($this->taxid->isValid('1A23456U', 'IE', 'vat'));
+
+        // The second character is ignored by the checksum, so any letter carries
+        // the same check letter.
+        foreach (['B', 'H', 'Z'] as $second) {
+            self::assertTrue(
+                $this->taxid->isValid('1' . $second . '23456W', 'IE', 'vat'),
+                'The second character plays no part in the checksum.',
+            );
+        }
     }
 
     /**

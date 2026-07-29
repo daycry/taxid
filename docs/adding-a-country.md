@@ -185,9 +185,12 @@ yield 'ZZ TIN' => ['ZZ', 'tin', ['12345678K'], ['12345678L', '1234567K']];
 Then a dedicated test for any branch — a legacy format, an exception for one issuer, a value that
 looks valid and must not be.
 
-## 5. Update the generated docs
+## 5. Update the coverage docs
 
-`docs/countries.md` is generated from the registry. Regenerate it, and mention the addition in
+`docs/countries.md` restates the registry as a table, by hand. `CountriesDocIsInSyncTest` will fail
+until your row is there and every cell of it agrees with the registry, including the count line at
+the top and the order of the rows within your country — read its failure message, it names the cell.
+Then mention the addition in
 `CHANGELOG.md`.
 
 ## Checklist
@@ -201,4 +204,4 @@ looks valid and must not be.
 - [ ] `notes` explains any missing checksum.
 - [ ] Validator stateless, never throws, `COUNTRIES`/`SCHEMES` correct.
 - [ ] `vendor/bin/phpunit`, `composer analyze` and `composer cs` all green.
-- [ ] `docs/countries.md` regenerated, `CHANGELOG.md` updated.
+- [ ] `docs/countries.md` row added and `CountriesDocIsInSyncTest` green, `CHANGELOG.md` updated.

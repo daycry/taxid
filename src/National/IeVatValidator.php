@@ -9,8 +9,10 @@ namespace Daycry\TaxId\National;
  *
  * - **Old style** — seven digits and a check letter (`1234567T`).
  * - **Old individual style** — a digit, a letter or `+`/`*`, five digits and a
- *   check letter (`1A23456T`). The second character is ignored by the checksum,
- *   which reads the number as `0` + digits.
+ *   check letter (`1A23456W`). The second character takes no part in the
+ *   checksum, and the leading digit moves to the **end** of the body, which is
+ *   read as `0` + the five middle digits + that leading digit. Dropping it
+ *   instead — which this class did before 1.2.0 — computes a different letter.
  * - **Post-2013** — seven digits, a check letter and a trailing `A`–`I` or `W`
  *   (`1234567FA`). That trailing letter joins the sum with weight 9.
  *
@@ -34,9 +36,15 @@ final class IeVatValidator extends AbstractNationalValidator
         }
 
         // Old individual style: the second character is a letter, + or *, and
-        // plays no part in the checksum -- the body is read as 0 + five digits.
+        // plays no part in the checksum. The leading digit moves to the end, so
+        // the seven-character body is 0 + the five middle digits + that digit.
         if ($length === 8 && ! ctype_digit($compact[1])) {
-            $body  = '0' . substr($compact, 2, 5);
+            $body = '0' . substr($compact, 2, 5) . $compact[0];
+
+            if (! ctype_digit($body)) {
+                return false;
+            }
+
             $extra = 0;
         } else {
             $body = substr($compact, 0, 7);
