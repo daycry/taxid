@@ -2132,16 +2132,24 @@ return [
                 'notes'              => 'Same algorithm as the Czech IČO — a shared Czechoslovak legacy.',
             ],
             [
-                'code'               => 'rodne_cislo',
-                'name'               => 'Rodné číslo — birth number',
-                'entity'             => 'natural',
-                'vat'                => false,
-                'pattern'            => '/^\d{9,10}$/',
-                'lengths'            => [9, 10],
-                'check_digit'        => SkRodneCisloValidator::class,
-                'check_digit_offset' => [-1, 1],
-                'examples'           => ['9001011239', '500101123'],
-                'notes'              => 'The same standard Czechia kept after 1993, so the algorithm is shared '
+                'code'    => 'rodne_cislo',
+                'name'    => 'Rodné číslo — birth number',
+                'entity'  => 'natural',
+                'vat'     => false,
+                'pattern' => '/^\d{9,10}$/',
+                'lengths' => [9, 10],
+
+                // No check_digit_offset, for the reason CZ/dic omits one too: only the
+                // ten-digit form has a check digit, and an offset would make
+                // ParsedTaxId::$checkDigit report the last character of a nine-digit
+                // pre-1954 number as if it were one. Better null than fabricated.
+                'check_digit' => SkRodneCisloValidator::class,
+
+                // The ten-digit form MUST stay first: CountriesDataIntegrityTest's
+                // mutation gate only inspects examples[0], and the nine-digit form has
+                // no checksum to reject a mutation with.
+                'examples' => ['9001011239', '500101123'],
+                'notes'    => 'The same standard Czechia kept after 1993, so the algorithm is shared '
                     . 'with CZ/dic. Ten digits carry a check digit — the first nine modulo eleven, with a '
                     . 'remainder of ten written as 0 for 1954-1985 births; the nine-digit pre-1954 form has none, '
                     . 'so only its date can be checked. The month field adds 50 for women and a further 20 since '
