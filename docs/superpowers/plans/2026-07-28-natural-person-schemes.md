@@ -118,39 +118,46 @@ Append to `tests/Core/ChecksumTest.php`, and add `use Daycry\TaxId\Core\Checksum
      */
     public function testVerhoeffCatchesEveryAdjacentTranspositionAndLuhnDoesNot(): void
     {
-        $luhnMissed = 0;
+        $verhoeffMissed = [];
+        $luhnMissed     = 0;
 
         for ($n = 1000000; $n < 1001000; $n++) {
-            $base      = (string) $n;
-            $verhoeff  = $base . Verhoeff::checkDigit($base);
-            $luhn      = $base . Luhn::checkDigit($base);
+            $base = (string) $n;
 
-            for ($i = 0; $i < strlen($verhoeff) - 1; $i++) {
-                if ($verhoeff[$i] === $verhoeff[$i + 1]) {
-                    continue;
+            foreach (self::transpositions($base . Verhoeff::checkDigit($base)) as $swapped) {
+                if (Verhoeff::isValid($swapped)) {
+                    $verhoeffMissed[] = $swapped;
                 }
-
-                $swapped                          = $verhoeff;
-                [$swapped[$i], $swapped[$i + 1]]  = [$swapped[$i + 1], $swapped[$i]];
-
-                self::assertFalse(Verhoeff::isValid($swapped), 'Verhoeff missed a transposition in ' . $verhoeff);
             }
 
-            for ($i = 0; $i < strlen($luhn) - 1; $i++) {
-                if ($luhn[$i] === $luhn[$i + 1]) {
-                    continue;
-                }
-
-                $swapped                         = $luhn;
-                [$swapped[$i], $swapped[$i + 1]] = [$swapped[$i + 1], $swapped[$i]];
-
+            foreach (self::transpositions($base . Luhn::checkDigit($base)) as $swapped) {
                 if (Luhn::isValid($swapped)) {
                     $luhnMissed++;
                 }
             }
         }
 
-        self::assertGreaterThan(0, $luhnMissed, 'Luhn is expected to miss some transpositions; if it misses none, this comparison is broken.');
+        self::assertSame([], $verhoeffMissed, 'Verhoeff accepted these transposed values: ' . implode(', ', array_slice($verhoeffMissed, 0, 5)));
+        self::assertGreaterThan(0, $luhnMissed, 'Luhn is expected to miss some transpositions; if it misses none, this comparison proves nothing.');
+    }
+
+    /**
+     * Every distinct adjacent transposition of a numeric string.
+     *
+     * @return iterable<string>
+     */
+    private static function transpositions(string $digits): iterable
+    {
+        for ($i = 0; $i < strlen($digits) - 1; $i++) {
+            if ($digits[$i] === $digits[$i + 1]) {
+                continue;   // swapping equal digits changes nothing
+            }
+
+            $swapped                         = $digits;
+            [$swapped[$i], $swapped[$i + 1]] = [$swapped[$i + 1], $swapped[$i]];
+
+            yield $swapped;
+        }
     }
 
     public function testVerhoeffRejectsNonDigits(): void
@@ -318,6 +325,7 @@ Two failures are foreseeable, and both have a known cause:
 - [ ] **Step 5: Commit**
 
 ```bash
+composer test && composer analyze && composer cs
 git add src/Core/Checksum/Verhoeff.php tests/Core/ChecksumTest.php
 git commit -m "feat: Verhoeff check-digit primitive"
 ```
