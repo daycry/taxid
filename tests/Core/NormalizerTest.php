@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Core;
 
 use Daycry\TaxId\Core\Normalizer;
+use Daycry\TaxId\Enums\ViolationCode;
+use Daycry\TaxId\TaxId;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -22,6 +24,7 @@ final class NormalizerTest extends TestCase
         yield 'strips parentheses'         => ['(12345678)Z', '12345678Z'];
         yield 'strips tabs and newlines'   => ["12345678\tZ\n", '12345678Z'];
         yield 'strips underscores'         => ['1234_5678_Z', '12345678Z'];
+        yield 'strips plus signs'          => ['010101+123A', '010101123A'];
         yield 'leaves an empty string'     => ['', ''];
         yield 'separators only'            => ['---', ''];
     }
@@ -58,5 +61,22 @@ final class NormalizerTest extends TestCase
         $once       = $normalizer->normalize('11.222.333/0001-81');
 
         self::assertSame($once, $normalizer->normalize($once));
+    }
+
+    /**
+     * `+` is a separator because Finland makes it one: the century marker for
+     * someone born in the 1800s is a literal plus, and IllegalCharacters is
+     * checked before any scheme is consulted, so without this the character can
+     * never reach a pattern.
+     *
+     * This widens every country, and that is safe in one direction only: a value
+     * containing `+` is IllegalCharacters today, so nothing that currently
+     * validates can change meaning.
+     */
+    public function testPlusNoLongerTripsIllegalCharacters(): void
+    {
+        $result = (new TaxId())->validate('1234+5678Z', 'ES');
+
+        self::assertNotSame(ViolationCode::IllegalCharacters, $result->errorCode());
     }
 }

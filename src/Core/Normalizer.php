@@ -8,8 +8,9 @@ namespace Daycry\TaxId\Core;
  * Canonicalizes raw input before anything else looks at it.
  *
  * Purely mechanical and non-judgmental: uppercase, then drop whitespace and the
- * separators humans actually type into a tax ID — `.`, `-`, `/`, `\`, `_`,
- * `(`, `)`, `[`, `]`, `:`, `,`, `'`. So `12.345.678-Z`, `12 345 678 Z` and
+ * separators humans actually type into a tax ID — `.`, `-`, `+`, `/`, `\`, `_`,
+ * `(`, `)`, `[`, `]`, `:`, `,`, `'`. The `+` earns its place through Finland,
+ * whose henkilötunnus uses it as the century marker for the 1800s. So `12.345.678-Z`, `12 345 678 Z` and
  * `12345678z` all become `12345678Z`.
  *
  * What it deliberately does **not** do:
@@ -30,7 +31,7 @@ final class Normalizer
      * Characters treated as noise. Kept as a character class rather than a
      * `str_replace()` list so the regex engine does it in one pass.
      */
-    private const SEPARATORS = '/[\s.\-\/\\\\_()\[\]:,\']+/';
+    private const SEPARATORS = '/[\s.\-+\/\\\\_()\[\]:,\']+/';
 
     public function normalize(string $taxId): string
     {
