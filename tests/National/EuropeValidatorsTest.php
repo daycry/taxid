@@ -73,6 +73,7 @@ final class EuropeValidatorsTest extends TestCase
 
         yield 'LU VAT' => ['LU', 'vat', ['20260743'], ['20260744']];
         yield 'AT UID' => ['AT', 'uid', ['U10223006'], ['U10223007']];
+        yield 'AT Steuernummer' => ['AT', 'steuernummer', ['123456782', '591199013'], ['123456783', '12345678', '1234567820']];
         yield 'DK CVR' => ['DK', 'cvr', ['13585628'], ['13585629']];
 
         yield 'SE orgnr'        => ['SE', 'orgnr', ['5560360793'], ['5560360794']];

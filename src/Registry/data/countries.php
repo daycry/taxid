@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Daycry\TaxId\National\ArCuitValidator;
+use Daycry\TaxId\National\AtSteuernummerValidator;
 use Daycry\TaxId\National\AtUidValidator;
 use Daycry\TaxId\National\AuAbnValidator;
 use Daycry\TaxId\National\AuAcnValidator;
@@ -222,6 +223,19 @@ return [
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['U10223006'],
                 'notes'              => 'The leading U belongs to the national number, not to the AT prefix.',
+            ],
+            [
+                'code'               => 'steuernummer',
+                'name'               => 'Steuernummer — Abgabenkontonummer',
+                'entity'             => 'both',
+                'vat'                => false,
+                'pattern'            => '/^\d{9}$/',
+                'lengths'            => [9],
+                'mask'               => '##-###/####',
+                'check_digit'        => AtSteuernummerValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['123456782'],
+                'notes'              => 'Issued to individuals and companies alike, which is why the entity is "both". The first two digits are the Finanzamt code and are not validated. The check digit is Luhn.',
             ],
         ],
     ],
