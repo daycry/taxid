@@ -35,6 +35,18 @@ number.
   1800s is a literal plus, and it could never reach a pattern before.
 - 1,371 tests, PHPStan level 8, PSR-12, still no network access in the suite.
 
+## v1.2 — shipped
+
+One scheme, correcting an inconsistency inside the registry rather than adding a country.
+
+- **`SK/rodne_cislo`**, taking the registry to **146 schemes**, 96 of them with a verified check
+  digit, and the validator count to 85. Czechia and Slovakia both kept the Czechoslovak rodné
+  číslo after 1993, but only Czechia had a scheme for it: the same personal identifier validated
+  as `CZ` and was refused as `SK`.
+- **`SK/vat` is `entity: both`, not `legal`.** The IČ DPH is the DIČ with an SK prefix, and the
+  DIČ is issued to sole traders as well as companies.
+- 1,383 tests, PHPStan level 8, PSR-12, still no network access in the suite.
+
 ## Deliberately out of scope
 
 These are not "not yet". They are decisions.

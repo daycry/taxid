@@ -321,6 +321,6 @@ final class CountriesDataIntegrityTest extends TestCase
         $registry = new Registry();
 
         self::assertGreaterThanOrEqual(90, count($registry->countries()));
-        self::assertGreaterThanOrEqual(145, $registry->schemeCount());
+        self::assertGreaterThanOrEqual(146, $registry->schemeCount());
     }
 }

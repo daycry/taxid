@@ -35,8 +35,8 @@ final class CzDicValidator extends AbstractNationalValidator
 
         return match (strlen($compact)) {
             8       => self::isValidIco($compact),
-            9       => $this->isPlausibleBirthNumber($compact),
-            10      => $this->isValidBirthNumber($compact),
+            9       => self::isPlausibleBirthNumber($compact),
+            10      => self::isValidBirthNumber($compact),
             default => false,
         };
     }
@@ -59,15 +59,23 @@ final class CzDicValidator extends AbstractNationalValidator
     /**
      * Pre-1954 rodné číslo: no check digit ever existed, so only the encoded
      * date is examined.
+     *
+     * Public and static for the same reason as {@see isValidIco()}: Slovakia
+     * kept the identical standard after 1993, so {@see SkRodneCisloValidator}
+     * shares this rather than carrying a second copy of it.
      */
-    private function isPlausibleBirthNumber(string $digits): bool
+    public static function isPlausibleBirthNumber(string $digits): bool
     {
-        return $this->hasPlausibleDate($digits);
+        return strlen($digits) === 9 && ctype_digit($digits) && self::hasPlausibleDate($digits);
     }
 
-    private function isValidBirthNumber(string $digits): bool
+    /**
+     * Modern ten-digit rodné číslo. Shared with Slovakia — see
+     * {@see isPlausibleBirthNumber()}.
+     */
+    public static function isValidBirthNumber(string $digits): bool
     {
-        if (! $this->hasPlausibleDate($digits)) {
+        if (strlen($digits) !== 10 || ! ctype_digit($digits) || ! self::hasPlausibleDate($digits)) {
             return false;
         }
 
@@ -88,7 +96,7 @@ final class CzDicValidator extends AbstractNationalValidator
      * Month is offset by 50 for women and, since 2004, by a further 20 when a
      * day's numbers run out; day must be 1–31.
      */
-    private function hasPlausibleDate(string $digits): bool
+    private static function hasPlausibleDate(string $digits): bool
     {
         $month = (int) substr($digits, 2, 2) % 50 % 20;
         $day   = (int) substr($digits, 4, 2);

@@ -1,6 +1,6 @@
 # Country coverage
 
-**94 jurisdictions, 145 schemes, 95 of them with a verified check digit.**
+**94 jurisdictions, 146 schemes, 96 of them with a verified check digit.**
 
 This file is generated from `src/Registry/data/countries.php`; `php spark taxid:countries` prints the
 same thing from the live registry. If the two ever disagree, believe the command.
@@ -146,8 +146,9 @@ order — the first structural match wins when you don't name a scheme.
 | `SE` | Sweden | `orgnr` | Organisationsnummer | legal | — | 10 | ✅ | `5560360793` |
 | `SG` | Singapore | `uen` | UEN — Unique Entity Number | legal | ✅ | 9, 10 | — | `53012345A` |
 | `SI` | Slovenia | `vat` | Davčna številka — tax number | both | ✅ | 8 | ✅ | `15012557` |
-| `SK` | Slovakia | `vat` | IČ DPH — VAT number | legal | ✅ | 10 | ✅ | `2020269922` |
+| `SK` | Slovakia | `vat` | IČ DPH — VAT number | both | ✅ | 10 | ✅ | `2020269922` |
 | `SK` | Slovakia | `ico` | IČO — organisation number | legal | — | 8 | ✅ | `31234569` |
+| `SK` | Slovakia | `rodne_cislo` | Rodné číslo — birth number | natural | — | 9, 10 | ✅ | `9001011239` |
 | `SV` | El Salvador | `nit` | NIT — Número de Identificación Tributaria | both | ✅ | 14 | — | `06140506901121` |
 | `TH` | Thailand | `tin` | Taxpayer Identification Number | both | ✅ | 13 | — | `1234567890123` |
 | `TN` | Tunisia | `mf` | MF — Matricule Fiscal | both | ✅ | 13 | — | `1234567ABC000` |
