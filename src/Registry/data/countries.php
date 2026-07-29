@@ -52,6 +52,7 @@ use Daycry\TaxId\National\JpCorporateNumberValidator;
 use Daycry\TaxId\National\KrBrnValidator;
 use Daycry\TaxId\National\LtAsmensKodasValidator;
 use Daycry\TaxId\National\LtPvmValidator;
+use Daycry\TaxId\National\LuMatriculeValidator;
 use Daycry\TaxId\National\LuVatValidator;
 use Daycry\TaxId\National\LvPersonalCodeValidator;
 use Daycry\TaxId\National\LvVatValidator;
@@ -1443,6 +1444,19 @@ return [
                 'check_digit'        => LuVatValidator::class,
                 'check_digit_offset' => [-2, 2],
                 'examples'           => ['20260743'],
+            ],
+            [
+                'code'               => 'matricule',
+                'name'               => 'Matricule — numéro d\'identification national',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^\d{13}$/',
+                'lengths'            => [13],
+                'mask'               => '#### ## ## ### ##',
+                'check_digit'        => LuMatriculeValidator::class,
+                'check_digit_offset' => [-2, 2],
+                'examples'           => ['1990010112385'],
+                'notes'              => 'Thirteen digits since 1 July 2014: the birth date, a three-digit serial, then two check digits — Luhn over the first eleven and Verhoeff over the same eleven. The older eleven-digit form is not accepted. The date is not validated.',
             ],
         ],
     ],

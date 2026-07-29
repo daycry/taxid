@@ -73,6 +73,12 @@ final class EuropeValidatorsTest extends TestCase
         yield 'BE NN'  => ['BE', 'nn', ['85073003328'], ['85073003329']];
 
         yield 'LU VAT' => ['LU', 'vat', ['20260743'], ['20260744']];
+        yield 'LU matricule' => [
+            'LU',
+            'matricule',
+            ['1990010112385', '1985031200757'],
+            ['1990010112386', '1990010112395', '199001011238'],
+        ];
         yield 'AT UID' => ['AT', 'uid', ['U10223006'], ['U10223007']];
         yield 'AT Steuernummer' => ['AT', 'steuernummer', ['123456782', '591199013'], ['123456783', '12345678', '1234567820']];
         yield 'DK CVR' => ['DK', 'cvr', ['13585628'], ['13585629']];
@@ -358,5 +364,23 @@ final class EuropeValidatorsTest extends TestCase
 
         // Checksum correct, month impossible.
         self::assertFalse($this->taxid->isValid('39013011237', 'LT', 'asmens_kodas'));
+    }
+
+    /**
+     * Luxembourg's matricule carries two check digits over the same eleven-digit
+     * base: a Luhn digit in the twelfth position and a Verhoeff digit in the
+     * thirteenth. Each invalid value here breaks exactly one of them, so an
+     * implementation that checks only one digit — or that checks the same digit
+     * twice — fails this test and passes everything else.
+     */
+    public function testLuxembourgMatriculeChecksBothDigitsIndependently(): void
+    {
+        self::assertTrue($this->taxid->isValid('1990010112385', 'LU', 'matricule'));
+
+        // Luhn digit right, Verhoeff digit wrong.
+        self::assertFalse($this->taxid->isValid('1990010112386', 'LU', 'matricule'));
+
+        // Verhoeff digit right, Luhn digit wrong.
+        self::assertFalse($this->taxid->isValid('1990010112395', 'LU', 'matricule'));
     }
 }
