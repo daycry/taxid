@@ -121,7 +121,7 @@ and provides none.
 v1.0: 94 jurisdictions, 136 schemes, 88 of them with a verified check digit. 1,284 tests, PHPStan
 level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere in the suite.
 
-v1.1: 94 jurisdictions, 145 schemes, 95 of them with a verified check digit. 1,370 tests, PHPStan
+v1.1: 94 jurisdictions, 145 schemes, 95 of them with a verified check digit. 1,371 tests, PHPStan
 level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere in the suite.
 
 ## References
