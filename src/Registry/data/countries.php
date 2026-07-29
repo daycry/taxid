@@ -40,6 +40,7 @@ use Daycry\TaxId\National\FrTvaValidator;
 use Daycry\TaxId\National\GbVatValidator;
 use Daycry\TaxId\National\GrAfmValidator;
 use Daycry\TaxId\National\HrOibValidator;
+use Daycry\TaxId\National\HuAdoazonositoValidator;
 use Daycry\TaxId\National\HuVatValidator;
 use Daycry\TaxId\National\IeVatValidator;
 use Daycry\TaxId\National\IlIdValidator;
@@ -1128,6 +1129,18 @@ return [
                 'check_digit'        => HuVatValidator::class,
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['10778757'],
+            ],
+            [
+                'code'               => 'adoazonosito',
+                'name'               => 'Adóazonosító jel — personal tax identifier',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^8\d{9}$/',
+                'lengths'            => [10],
+                'check_digit'        => HuAdoazonositoValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['8123456786'],
+                'notes'              => 'The individual\'s identifier, distinct from the eleven-digit corporate adószám. Always begins with 8. Digits 2-6 encode the birth date as days elapsed since 1867-01-01, which is not decoded. A serial whose weighted sum leaves a remainder of 10 is never issued.',
             ],
         ],
     ],

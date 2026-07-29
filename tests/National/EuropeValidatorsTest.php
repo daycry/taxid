@@ -102,6 +102,7 @@ final class EuropeValidatorsTest extends TestCase
 
         yield 'HU ANUM'    => ['HU', 'anum', ['10778757'], ['10778758']];
         yield 'HU adószám' => ['HU', 'adoszam', ['10778757443'], ['10778758443']];
+        yield 'HU adóazonosító' => ['HU', 'adoazonosito', ['8123456786', '8401234565'], ['8123456787', '8000000130', '7123456786', '812345678']];
 
         yield 'SI VAT' => ['SI', 'vat', ['15012557'], ['15012558']];
         yield 'HR OIB' => ['HR', 'oib', ['69435151530'], ['69435151531']];
@@ -310,6 +311,27 @@ final class EuropeValidatorsTest extends TestCase
             self::assertFalse(
                 $this->taxid->isValid('290280123' . $absent, 'FI', 'henkilotunnus'),
                 $absent . ' is not in the control alphabet and must not be accepted.',
+            );
+        }
+    }
+
+    /**
+     * Hungary's personal tax identifier always starts with 8, and a serial whose
+     * weighted sum leaves a remainder of ten is never issued — ten cannot be
+     * written in the single digit the format allows, and the office skips the
+     * serial rather than folding it to zero. Folding it would validate numbers
+     * that do not exist.
+     */
+    public function testHungarianPersonalIdRejectsTheUnwritableRemainder(): void
+    {
+        self::assertTrue($this->taxid->isValid('8123456786', 'HU', 'adoazonosito'));
+
+        // 800000013 has a weighted sum leaving remainder 10, so no check digit
+        // completes it — every ending must be refused.
+        for ($digit = 0; $digit <= 9; $digit++) {
+            self::assertFalse(
+                $this->taxid->isValid('800000013' . $digit, 'HU', 'adoazonosito'),
+                'A serial whose remainder is 10 was accepted with check digit ' . $digit,
             );
         }
     }
