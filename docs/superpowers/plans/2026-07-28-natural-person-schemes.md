@@ -367,7 +367,11 @@ and add this test, plus `use Daycry\TaxId\Enums\ViolationCode;` and `use Daycry\
     {
         $result = (new TaxId())->validate('1234+5678Z', 'ES');
 
-        self::assertNotSame(ViolationCode::IllegalCharacters, $result->errorCode());
+        // `errorCode()` returns the enum's BACKED VALUE, not the case — comparing
+        // it against `ViolationCode::IllegalCharacters` would compare an object to
+        // a string, which is never identical, and the assertion could never fail.
+        self::assertNotSame(ViolationCode::IllegalCharacters->value, $result->errorCode());
+        self::assertTrue($result->isValid());
     }
 ```
 
