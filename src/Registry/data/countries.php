@@ -50,6 +50,7 @@ use Daycry\TaxId\National\ItCodiceFiscaleValidator;
 use Daycry\TaxId\National\ItPartitaIvaValidator;
 use Daycry\TaxId\National\JpCorporateNumberValidator;
 use Daycry\TaxId\National\KrBrnValidator;
+use Daycry\TaxId\National\LtAsmensKodasValidator;
 use Daycry\TaxId\National\LtPvmValidator;
 use Daycry\TaxId\National\LuVatValidator;
 use Daycry\TaxId\National\LvPersonalCodeValidator;
@@ -1412,6 +1413,18 @@ return [
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['213179412'],
                 'notes'              => '9 digits for a legal entity, 12 for a natural person; both end in 1 + check.',
+            ],
+            [
+                'code'               => 'asmens_kodas',
+                'name'               => 'Asmens kodas — personal code',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^[1-69]\d{10}$/',
+                'lengths'            => [11],
+                'check_digit'        => LtAsmensKodasValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['39001011237'],
+                'notes'              => 'The leading digit encodes sex and century (1/2 = 1800s, 3/4 = 1900s, 5/6 = 2000s); 9 marks a code issued without a known birth date, for which the date fields are not checked. Same two-pass mod-11 as Estonia\'s isikukood. Distinct from the 12-digit natural-person PVM code.',
             ],
         ],
     ],

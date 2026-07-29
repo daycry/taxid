@@ -127,6 +127,12 @@ final class EuropeValidatorsTest extends TestCase
         yield 'LV personas kods' => ['LV', 'personas_kods', ['32081012341'], ['32081012342']];
 
         yield 'LT PVM' => ['LT', 'pvm', ['213179412'], ['213179413', '213179422']];
+        yield 'LT asmens kodas' => [
+            'LT',
+            'asmens_kodas',
+            ['39001011237', '49001011238', '90000001235'],
+            ['39001011238', '79001011237', '39013011237', '3900101123'],
+        ];
         yield 'MT VAT' => ['MT', 'vat', ['12345634'], ['12345635']];
         yield 'CY VAT' => ['CY', 'vat', ['10259033P'], ['10259033Q']];
 
@@ -334,5 +340,23 @@ final class EuropeValidatorsTest extends TestCase
                 'A serial whose remainder is 10 was accepted with check digit ' . $digit,
             );
         }
+    }
+
+    /**
+     * Lithuania's leading digit encodes sex and century, and 9 marks a code
+     * issued without a known birth date — for which the date fields carry no
+     * meaning and must not be range-checked. `39013011237` is the case that
+     * proves the check does something: its checksum is CORRECT and it is refused
+     * purely because month 13 does not exist.
+     */
+    public function testLithuanianPersonalCodeChecksTheDateOnlyWhenThereIsOne(): void
+    {
+        self::assertTrue($this->taxid->isValid('39001011237', 'LT', 'asmens_kodas'));
+
+        // Leading 9: no birth date, so nothing to validate but the checksum.
+        self::assertTrue($this->taxid->isValid('90000001235', 'LT', 'asmens_kodas'));
+
+        // Checksum correct, month impossible.
+        self::assertFalse($this->taxid->isValid('39013011237', 'LT', 'asmens_kodas'));
     }
 }
