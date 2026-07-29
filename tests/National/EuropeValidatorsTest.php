@@ -82,6 +82,13 @@ final class EuropeValidatorsTest extends TestCase
 
         yield 'FI Y-tunnus' => ['FI', 'ytunnus', ['02012566'], ['02012567']];
 
+        yield 'FI henkilötunnus' => [
+            'FI',
+            'henkilotunnus',
+            ['010190123M', '010106A123Y', '290280123X'],
+            ['010190123N', '010190123G', '011390123M', '01019012345', '000190123M'],
+        ];
+
         yield 'PL NIP'   => ['PL', 'nip', ['1234563218'], ['1234563219']];
         yield 'PL PESEL' => ['PL', 'pesel', ['44051401359'], ['44051401358']];
         yield 'PL REGON' => ['PL', 'regon', ['123456785', '12345678500010'], ['123456786']];
@@ -267,5 +274,42 @@ final class EuropeValidatorsTest extends TestCase
         // 12.345.670-K
         self::assertTrue($this->taxid->isValid('12345670K', 'CL', 'rut'));
         self::assertFalse($this->taxid->isValid('123456700', 'CL', 'rut'));
+    }
+
+    /**
+     * Finland writes the century between the date and the serial: `+` for the
+     * 1800s, `-` or U-Y for the 1900s, A-F for the 2000s. Normalization strips
+     * the punctuation forms and keeps the letters, so the same person's identity
+     * code legitimately arrives as ten characters or eleven. The checksum never
+     * sees the marker, so both must validate.
+     */
+    public function testFinnishCenturyMarkerMayBeStrippedOrKept(): void
+    {
+        // 1900s, punctuation marker: stripped, ten characters.
+        self::assertTrue($this->taxid->isValid('010190-123M', 'FI', 'henkilotunnus'));
+        // 1800s, punctuation marker: stripped too — the reason `+` is a separator.
+        self::assertTrue($this->taxid->isValid('010190+123M', 'FI', 'henkilotunnus'));
+        // 2000s, letter marker: kept, eleven characters, same arithmetic.
+        self::assertTrue($this->taxid->isValid('010106A123Y', 'FI', 'henkilotunnus'));
+
+        // The marker is not a wildcard: a letter that marks no century is refused.
+        self::assertFalse($this->taxid->isValid('010106G123Y', 'FI', 'henkilotunnus'));
+    }
+
+    /**
+     * The control alphabet has 31 characters and omits G, I, O, Q and Z, which
+     * are the ones a reader confuses with 6, 1, 0, 0 and 2. A value ending in
+     * one of them is not a mistyped check character — it is not a henkilötunnus.
+     */
+    public function testFinnishControlAlphabetOmitsTheConfusableLetters(): void
+    {
+        self::assertTrue($this->taxid->isValid('290280123X', 'FI', 'henkilotunnus'));
+
+        foreach (['G', 'I', 'O', 'Q', 'Z'] as $absent) {
+            self::assertFalse(
+                $this->taxid->isValid('290280123' . $absent, 'FI', 'henkilotunnus'),
+                $absent . ' is not in the control alphabet and must not be accepted.',
+            );
+        }
     }
 }

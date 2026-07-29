@@ -32,6 +32,7 @@ use Daycry\TaxId\National\EeIsikukoodValidator;
 use Daycry\TaxId\National\EeVatValidator;
 use Daycry\TaxId\National\EsCifValidator;
 use Daycry\TaxId\National\EsDniValidator;
+use Daycry\TaxId\National\FiHenkilotunnusValidator;
 use Daycry\TaxId\National\FiYtunnusValidator;
 use Daycry\TaxId\National\FrSirenValidator;
 use Daycry\TaxId\National\FrTvaValidator;
@@ -884,6 +885,19 @@ return [
                 'check_digit'        => FiYtunnusValidator::class,
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['02012566'],
+            ],
+            [
+                'code'               => 'henkilotunnus',
+                'name'               => 'Henkilötunnus — personal identity code',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^\d{6}[A-FU-Y]?\d{3}[0-9A-FHJ-NPR-Y]$/',
+                'lengths'            => [10, 11],
+                'mask'               => '######-####',
+                'check_digit'        => FiHenkilotunnusValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['010190123M', '010106A123Y'],
+                'notes'              => 'The century marker between the date and the serial is + (1800s), - or U-Y (1900s), or A-F (2000s). Normalization strips + and -, so the compact form is ten characters for those and eleven for a letter marker; the marker never enters the checksum. The control alphabet omits G, I, O, Q and Z. Temporary serials 900-999 are accepted.',
             ],
         ],
     ],
