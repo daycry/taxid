@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Daycry\TaxId\National\ArCuitValidator;
+use Daycry\TaxId\National\AtSteuernummerValidator;
 use Daycry\TaxId\National\AtUidValidator;
 use Daycry\TaxId\National\AuAbnValidator;
 use Daycry\TaxId\National\AuAcnValidator;
@@ -31,12 +32,15 @@ use Daycry\TaxId\National\EeIsikukoodValidator;
 use Daycry\TaxId\National\EeVatValidator;
 use Daycry\TaxId\National\EsCifValidator;
 use Daycry\TaxId\National\EsDniValidator;
+use Daycry\TaxId\National\FiHenkilotunnusValidator;
 use Daycry\TaxId\National\FiYtunnusValidator;
 use Daycry\TaxId\National\FrSirenValidator;
+use Daycry\TaxId\National\FrSpiValidator;
 use Daycry\TaxId\National\FrTvaValidator;
 use Daycry\TaxId\National\GbVatValidator;
 use Daycry\TaxId\National\GrAfmValidator;
 use Daycry\TaxId\National\HrOibValidator;
+use Daycry\TaxId\National\HuAdoazonositoValidator;
 use Daycry\TaxId\National\HuVatValidator;
 use Daycry\TaxId\National\IeVatValidator;
 use Daycry\TaxId\National\IlIdValidator;
@@ -46,7 +50,9 @@ use Daycry\TaxId\National\ItCodiceFiscaleValidator;
 use Daycry\TaxId\National\ItPartitaIvaValidator;
 use Daycry\TaxId\National\JpCorporateNumberValidator;
 use Daycry\TaxId\National\KrBrnValidator;
+use Daycry\TaxId\National\LtAsmensKodasValidator;
 use Daycry\TaxId\National\LtPvmValidator;
+use Daycry\TaxId\National\LuMatriculeValidator;
 use Daycry\TaxId\National\LuVatValidator;
 use Daycry\TaxId\National\LvPersonalCodeValidator;
 use Daycry\TaxId\National\LvVatValidator;
@@ -54,6 +60,7 @@ use Daycry\TaxId\National\MtVatValidator;
 use Daycry\TaxId\National\MxRfcValidator;
 use Daycry\TaxId\National\NlBsnValidator;
 use Daycry\TaxId\National\NlBtwValidator;
+use Daycry\TaxId\National\NoFodselsnummerValidator;
 use Daycry\TaxId\National\NoOrgnrValidator;
 use Daycry\TaxId\National\NzIrdValidator;
 use Daycry\TaxId\National\PeRucValidator;
@@ -222,6 +229,19 @@ return [
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['U10223006'],
                 'notes'              => 'The leading U belongs to the national number, not to the AT prefix.',
+            ],
+            [
+                'code'               => 'steuernummer',
+                'name'               => 'Steuernummer — Abgabenkontonummer',
+                'entity'             => 'both',
+                'vat'                => false,
+                'pattern'            => '/^\d{9}$/',
+                'lengths'            => [9],
+                'mask'               => '##-###/####',
+                'check_digit'        => AtSteuernummerValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['123456782'],
+                'notes'              => 'Issued to individuals and companies alike, which is why the entity is "both". The first two digits are the Finanzamt code and are not validated. The check digit is Luhn.',
             ],
         ],
     ],
@@ -871,6 +891,19 @@ return [
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['02012566'],
             ],
+            [
+                'code'               => 'henkilotunnus',
+                'name'               => 'Henkilötunnus — personal identity code',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^\d{6}[A-FU-Y]?\d{3}[0-9A-FHJ-NPR-Y]$/',
+                'lengths'            => [10, 11],
+                'mask'               => '######-####',
+                'check_digit'        => FiHenkilotunnusValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['010190123M', '010106A123Y'],
+                'notes'              => 'The century marker between the date and the serial is + (1800s), - or U-Y (1900s), or A-F (2000s). Normalization strips + and -, so the compact form is ten characters for those and eleven for a letter marker; the marker never enters the checksum. The control alphabet omits G, I, O, Q and Z. Temporary serials 900-999 are accepted.',
+            ],
         ],
     ],
 
@@ -913,6 +946,18 @@ return [
                 'check_digit'        => FrSirenValidator::class,
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['552100554'],
+            ],
+            [
+                'code'               => 'spi',
+                'name'               => 'Numéro fiscal de référence (SPI)',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^[0-3]\d{12}$/',
+                'lengths'            => [13],
+                'check_digit'        => FrSpiValidator::class,
+                'check_digit_offset' => [-3, 3],
+                'examples'           => ['1234567890066'],
+                'notes'              => 'Also called the numéro fiscal, printed on the avis d\'imposition. The last three digits are the first ten modulo 511. No mask: the tax office prints it as one block.',
             ],
         ],
     ],
@@ -1088,6 +1133,18 @@ return [
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['10778757'],
             ],
+            [
+                'code'               => 'adoazonosito',
+                'name'               => 'Adóazonosító jel — personal tax identifier',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^8\d{9}$/',
+                'lengths'            => [10],
+                'check_digit'        => HuAdoazonositoValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['8123456786'],
+                'notes'              => 'The individual\'s identifier, distinct from the eleven-digit corporate adószám. Always begins with 8. Digits 2-6 encode the birth date as days elapsed since 1867-01-01, which is not decoded. A serial whose weighted sum leaves a remainder of 10 is never issued.',
+            ],
         ],
     ],
 
@@ -1121,7 +1178,11 @@ return [
                 'lengths'     => [8, 9],
                 'check_digit' => IeVatValidator::class,
                 'examples'    => ['1234567T', '1234567FA'],
-                'notes'       => 'Three coexisting formats: pre-2013, post-2013 and the old individual style.',
+                'notes'       => 'Three coexisting formats: pre-2013, post-2013 and the old individual style. '
+                    . 'That old individual style\'s "+"/"*" second character is not matchable: '
+                    . 'normalization strips "+" before any pattern sees it, and "*" fails the '
+                    . 'illegal-character gate first — both were already unreachable before "+" became '
+                    . 'a separator, so this is a pre-existing gap, not a regression.',
             ],
         ],
     ],
@@ -1359,6 +1420,18 @@ return [
                 'examples'           => ['213179412'],
                 'notes'              => '9 digits for a legal entity, 12 for a natural person; both end in 1 + check.',
             ],
+            [
+                'code'               => 'asmens_kodas',
+                'name'               => 'Asmens kodas — personal code',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^[1-69]\d{10}$/',
+                'lengths'            => [11],
+                'check_digit'        => LtAsmensKodasValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['39001011237'],
+                'notes'              => 'The leading digit encodes sex and century (1/2 = 1800s, 3/4 = 1900s, 5/6 = 2000s); 9 marks a code issued without a known birth date, for which the date fields are not checked. Same two-pass mod-11 as Estonia\'s isikukood. Distinct from the 12-digit natural-person PVM code.',
+            ],
         ],
     ],
 
@@ -1376,6 +1449,19 @@ return [
                 'check_digit'        => LuVatValidator::class,
                 'check_digit_offset' => [-2, 2],
                 'examples'           => ['20260743'],
+            ],
+            [
+                'code'               => 'matricule',
+                'name'               => 'Matricule — numéro d\'identification national',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^\d{13}$/',
+                'lengths'            => [13],
+                'mask'               => '#### ## ## ### ##',
+                'check_digit'        => LuMatriculeValidator::class,
+                'check_digit_offset' => [-2, 2],
+                'examples'           => ['1990010112385'],
+                'notes'              => 'Thirteen digits since 1 July 2014: the birth date, a three-digit serial, then two check digits — Luhn over the first eleven and Verhoeff over the same eleven. The older eleven-digit form is not accepted. The date is not validated.',
             ],
         ],
     ],
@@ -1524,6 +1610,26 @@ return [
                 'check_digit_offset' => [-2, 2],
                 'examples'           => ['12345634'],
             ],
+            [
+                'code'     => 'id_card',
+                'name'     => 'Identity card number',
+                'entity'   => 'natural',
+                'vat'      => false,
+                'pattern'  => '/^\d{7}[ABGHLMPZ]$/',
+                'lengths'  => [8],
+                'examples' => ['0123456M'],
+                'notes'    => 'A Maltese national\'s TIN is their identity-card number: seven digits and a category letter (A, B, G, H, L, M, P or Z). The letter is a category, not a check character, so there is nothing to verify beyond the shape — hence no check_digit and no check_digit_offset. Leading zeros are part of the number: the short form 999L is the same value unpadded, and only the eight-character form is accepted.',
+            ],
+            [
+                'code'     => 'tin',
+                'name'     => 'TIN — tax identification number (non-nationals)',
+                'entity'   => 'natural',
+                'vat'      => false,
+                'pattern'  => '/^\d{9}$/',
+                'lengths'  => [9],
+                'examples' => ['123456789'],
+                'notes'    => 'Issued to individuals who are not Maltese nationals. Nine digits with no checksum and no internal structure, so validation can only confirm the length and the character set. Accepting it is still better than rejecting a real TIN.',
+            ],
         ],
     ],
 
@@ -1652,6 +1758,19 @@ return [
                 'check_digit'        => NoOrgnrValidator::class,
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['974760673'],
+            ],
+            [
+                'code'               => 'fodselsnummer',
+                'name'               => 'Fødselsnummer — national identity number',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^\d{11}$/',
+                'lengths'            => [11],
+                'mask'               => '###### #####',
+                'check_digit'        => NoFodselsnummerValidator::class,
+                'check_digit_offset' => [-2, 2],
+                'examples'           => ['01019012480'],
+                'notes'              => 'Also covers the D-number issued to non-residents, whose day field is offset by 40. The H-number, which offsets the month instead and is used only inside the health service, is refused even though its checksum is valid.',
             ],
         ],
     ],

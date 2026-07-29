@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Validate, parse and format tax identification numbers for **94 jurisdictions** — NIF, CIF, VAT,
-CPF, CNPJ, RFC, EIN, GSTIN and 128 other schemes — with real check-digit verification, not just a
+CPF, CNPJ, RFC, EIN, GSTIN and 137 other schemes — with real check-digit verification, not just a
 regex.
 
 Built for CodeIgniter 4, and equally usable standalone with zero dependencies.
@@ -108,7 +108,7 @@ php spark taxid:publish                             # publish the config into yo
 
 ## Coverage
 
-**94 countries, 136 schemes.** 88 of them verify a real check digit; the rest validate
+**94 countries, 145 schemes.** 95 of them verify a real check digit; the rest validate
 structure only, because the jurisdiction publishes no verifier algorithm — and each of those says so
 in its registry `notes`.
 
@@ -125,8 +125,8 @@ full matrix with lengths, entity types and which schemes are checksummed.
 
 ## Features
 
-- ✅ **Real check digits** — mod-11, mod-97, Luhn, ISO/IEC 7064 (MOD 11,10 / 11-2 / 37,36), and 77
-  national variants, each in its own small, tested class.
+- ✅ **Real check digits** — mod-11, mod-97, Luhn, Verhoeff, ISO/IEC 7064 (MOD 11,10 / 11-2 /
+  37,36), and 84 national variants, each in its own small, tested class.
 - ✅ **Country inference** from a VAT prefix (`ESB12345674`, `DE136695976`, `EL094259216`) — and
   never from bare digits, because that would be a confident guess with no basis.
 - ✅ **Precise violations** — twelve `ViolationCode` cases tell "wrong length" from "wrong shape"
@@ -138,7 +138,7 @@ full matrix with lengths, entity types and which schemes are checksummed.
 - ✅ **Optional VIES lookup** for EU VAT numbers, with a three-state answer that never confuses
   "the service was down" with "not registered".
 - ✅ **Framework-free core** — enforced by a test, not a promise.
-- ✅ PHPStan level 8, PSR-12, 1,284 tests.
+- ✅ PHPStan level 8, PSR-12, 1,371 tests.
 
 ## Resolving a taxpayer (optional)
 
@@ -213,7 +213,7 @@ being true.
 | [docs/formatting.md](docs/formatting.md) | Format reference and the print-mask language |
 | [docs/i18n.md](docs/i18n.md) | Translating violation messages |
 | [docs/licensing.md](docs/licensing.md) | Data authoring and privacy |
-| [docs/roadmap.md](docs/roadmap.md) | What v1.0 covers, and what it deliberately doesn't |
+| [docs/roadmap.md](docs/roadmap.md) | What v1.0 and v1.1 cover, and what it deliberately doesn't |
 
 ## Development
 

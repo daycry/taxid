@@ -7,12 +7,13 @@ namespace Tests\Core;
 use Daycry\TaxId\Core\Checksum\Iso7064;
 use Daycry\TaxId\Core\Checksum\Luhn;
 use Daycry\TaxId\Core\Checksum\Mod97;
+use Daycry\TaxId\Core\Checksum\Verhoeff;
 use Daycry\TaxId\Core\Checksum\Weights;
 use PHPUnit\Framework\TestCase;
 
 /**
  * The shared algorithm primitives. Around sixty national validators sit on top
- * of these four classes, so a bug here is a bug in sixty countries at once —
+ * of these five classes, so a bug here is a bug in sixty countries at once —
  * which is exactly why they are tested against published reference values
  * rather than only through their callers.
  */
@@ -154,5 +155,96 @@ final class ChecksumTest extends TestCase
         self::assertSame(0, Weights::mod11RemainderDigit(22));   // remainder 0
         self::assertSame(0, Weights::mod11RemainderDigit(23));   // remainder 1
         self::assertSame(9, Weights::mod11RemainderDigit(24));   // remainder 2
+    }
+
+    /**
+     * The canonical worked example from the literature: the Verhoeff check digit
+     * for 236 is 3. Pinning an externally-stated value matters more here than
+     * anywhere else in this class — a Verhoeff implementation can be built
+     * inverted and still pass every self-consistency test you throw at it.
+     */
+    public function testVerhoeffMatchesTheCanonicalReferenceValue(): void
+    {
+        self::assertSame(3, Verhoeff::checkDigit('236'));
+        self::assertTrue(Verhoeff::isValid('2363'));
+        self::assertFalse(Verhoeff::isValid('2364'));
+    }
+
+    public function testVerhoeffCheckDigitCompletesAnyPayload(): void
+    {
+        foreach (['1', '19900101123', '000', '999999999999'] as $payload) {
+            self::assertTrue(
+                Verhoeff::isValid($payload . Verhoeff::checkDigit($payload)),
+                'Verhoeff rejected the check digit it generated for ' . $payload,
+            );
+        }
+    }
+
+    public function testVerhoeffRejectsEverySingleDigitError(): void
+    {
+        $valid = '19900101123' . Verhoeff::checkDigit('19900101123');
+
+        for ($i = 0; $i < strlen($valid); $i++) {
+            $mutant     = $valid;
+            $mutant[$i] = (string) (((int) $valid[$i] + 1) % 10);
+
+            self::assertFalse(Verhoeff::isValid($mutant), 'Verhoeff accepted a single-digit error at position ' . $i);
+        }
+    }
+
+    /**
+     * The property Verhoeff exists for, and the reason Luxembourg pairs it with a
+     * Luhn digit rather than a second Luhn digit: Luhn misses adjacent
+     * transpositions whose digits differ by 5 (09 <-> 90), Verhoeff misses none.
+     * This test asserts both halves, because the contrast is the justification.
+     */
+    public function testVerhoeffCatchesEveryAdjacentTranspositionAndLuhnDoesNot(): void
+    {
+        $verhoeffMissed = [];
+        $luhnMissed     = 0;
+
+        for ($n = 1000000; $n < 1001000; $n++) {
+            $base = (string) $n;
+
+            foreach (self::transpositions($base . Verhoeff::checkDigit($base)) as $swapped) {
+                if (Verhoeff::isValid($swapped)) {
+                    $verhoeffMissed[] = $swapped;
+                }
+            }
+
+            foreach (self::transpositions($base . Luhn::checkDigit($base)) as $swapped) {
+                if (Luhn::isValid($swapped)) {
+                    $luhnMissed++;
+                }
+            }
+        }
+
+        self::assertSame([], $verhoeffMissed, 'Verhoeff accepted these transposed values: ' . implode(', ', array_slice($verhoeffMissed, 0, 5)));
+        self::assertGreaterThan(0, $luhnMissed, 'Luhn is expected to miss some transpositions; if it misses none, this comparison proves nothing.');
+    }
+
+    /**
+     * Every distinct adjacent transposition of a numeric string.
+     *
+     * @return iterable<string>
+     */
+    private static function transpositions(string $digits): iterable
+    {
+        for ($i = 0; $i < strlen($digits) - 1; $i++) {
+            if ($digits[$i] === $digits[$i + 1]) {
+                continue;   // swapping equal digits changes nothing
+            }
+
+            $swapped                         = $digits;
+            [$swapped[$i], $swapped[$i + 1]] = [$swapped[$i + 1], $swapped[$i]];
+
+            yield $swapped;
+        }
+    }
+
+    public function testVerhoeffRejectsNonDigits(): void
+    {
+        self::assertFalse(Verhoeff::isValid(''));
+        self::assertFalse(Verhoeff::isValid('236X'));
     }
 }

@@ -1,6 +1,6 @@
 # Country coverage
 
-**94 jurisdictions, 136 schemes, 88 of them with a verified check digit.**
+**94 jurisdictions, 145 schemes, 95 of them with a verified check digit.**
 
 This file is generated from `src/Registry/data/countries.php`; `php spark taxid:countries` prints the
 same thing from the live registry. If the two ever disagree, believe the command.
@@ -26,6 +26,7 @@ order — the first structural match wins when you don't name a scheme.
 | `AM` | Armenia | `tin` | ՀՎՀՀ — Taxpayer Identification Number | both | ✅ | 8 | — | `12345678` |
 | `AR` | Argentina | `cuit` | CUIT/CUIL — Clave Única de Identificación Tributaria/Laboral | both | ✅ | 11 | ✅ | `20123456786` |
 | `AT` | Austria | `uid` | UID — Umsatzsteuer-Identifikationsnummer | legal | ✅ | 9 | ✅ | `U10223006` |
+| `AT` | Austria | `steuernummer` | Steuernummer — Abgabenkontonummer | both | — | 9 | ✅ | `123456782` |
 | `AU` | Australia | `abn` | ABN — Australian Business Number | both | ✅ | 11 | ✅ | `51824753556` |
 | `AU` | Australia | `acn` | ACN — Australian Company Number | legal | — | 9 | ✅ | `004085616` |
 | `AU` | Australia | `tfn` | TFN — Tax File Number | both | — | 8, 9 | ✅ | `123456782` |
@@ -68,9 +69,11 @@ order — the first structural match wins when you don't name a scheme.
 | `ES` | Spain | `nie` | NIE — Número de Identidad de Extranjero | natural | ✅ | 9 | ✅ | `X1234567L` |
 | `ES` | Spain | `cif` | CIF — Código de Identificación Fiscal (personas jurídicas) | legal | ✅ | 9 | ✅ | `B12345674` |
 | `FI` | Finland | `ytunnus` | Y-tunnus — business identity code | legal | ✅ | 8 | ✅ | `02012566` |
+| `FI` | Finland | `henkilotunnus` | Henkilötunnus — personal identity code | natural | — | 10, 11 | ✅ | `010190123M` |
 | `FR` | France | `siret` | SIRET — establishment number | legal | — | 14 | ✅ | `55210055400013` |
 | `FR` | France | `tva` | TVA intracommunautaire | legal | ✅ | 11 | ✅ | `96552100554` |
 | `FR` | France | `siren` | SIREN — legal entity number | legal | — | 9 | ✅ | `552100554` |
+| `FR` | France | `spi` | Numéro fiscal de référence (SPI) | natural | — | 13 | ✅ | `1234567890066` |
 | `GB` | United Kingdom | `vat` | VAT registration number | legal | ✅ | 5, 9, 12 | ✅ | `123456782` |
 | `GB` | United Kingdom | `utr` | UTR — Unique Taxpayer Reference | both | — | 10 | — | `1234567890` |
 | `GB` | United Kingdom | `nino` | NINO — National Insurance number | natural | — | 9 | — | `AB123456C` |
@@ -82,6 +85,7 @@ order — the first structural match wins when you don't name a scheme.
 | `HR` | Croatia | `oib` | OIB — Osobni identifikacijski broj | both | ✅ | 11 | ✅ | `69435151530` |
 | `HU` | Hungary | `adoszam` | Adószám — full tax number | legal | — | 11 | ✅ | `10778757443` |
 | `HU` | Hungary | `anum` | Közösségi adószám — EU VAT number | legal | ✅ | 8 | ✅ | `10778757` |
+| `HU` | Hungary | `adoazonosito` | Adóazonosító jel — personal tax identifier | natural | — | 10 | ✅ | `8123456786` |
 | `ID` | Indonesia | `npwp` | NPWP — Nomor Pokok Wajib Pajak | both | ✅ | 15, 16 | — | `013456789012000` |
 | `IE` | Ireland | `vat` | VAT registration number | both | ✅ | 8, 9 | ✅ | `1234567T` |
 | `IL` | Israel | `hp` | ח.פ. — company number / VAT dealer number | legal | ✅ | 9 | ✅ | `512345679` |
@@ -99,7 +103,9 @@ order — the first structural match wins when you don't name a scheme.
 | `KZ` | Kazakhstan | `bin` | BIN/IIN — business or individual identification number | both | ✅ | 12 | — | `123456789012` |
 | `LI` | Liechtenstein | `uid` | MWST-Nummer | legal | ✅ | 5 | — | `12345` |
 | `LT` | Lithuania | `pvm` | PVM mokėtojo kodas — VAT number | both | ✅ | 9, 12 | ✅ | `213179412` |
+| `LT` | Lithuania | `asmens_kodas` | Asmens kodas — personal code | natural | — | 11 | ✅ | `39001011237` |
 | `LU` | Luxembourg | `vat` | Numéro de TVA | legal | ✅ | 8 | ✅ | `20260743` |
+| `LU` | Luxembourg | `matricule` | Matricule — numéro d'identification national | natural | — | 13 | ✅ | `1990010112385` |
 | `LV` | Latvia | `personas_kods` | Personas kods — personal code | natural | — | 11 | ✅ | `32081012341` |
 | `LV` | Latvia | `vat` | PVN reģistrācijas numurs — VAT number | legal | ✅ | 11 | ✅ | `40003009497` |
 | `MA` | Morocco | `if` | IF — Identifiant Fiscal | both | ✅ | 7, 8 | — | `12345678` |
@@ -109,6 +115,8 @@ order — the first structural match wins when you don't name a scheme.
 | `ME` | Montenegro | `pib` | PIB — Poreski identifikacioni broj | both | ✅ | 8 | — | `12345678` |
 | `MK` | North Macedonia | `edb` | ЕДБ — tax number | both | ✅ | 13 | — | `4030000375897` |
 | `MT` | Malta | `vat` | VAT registration number | legal | ✅ | 8 | ✅ | `12345634` |
+| `MT` | Malta | `id_card` | Identity card number | natural | — | 8 | — | `0123456M` |
+| `MT` | Malta | `tin` | TIN — tax identification number (non-nationals) | natural | — | 9 | — | `123456789` |
 | `MX` | Mexico | `rfc` | RFC — Registro Federal de Contribuyentes | both | ✅ | 12, 13 | ✅ | `AAA010101AA1` |
 | `MY` | Malaysia | `tin` | TIN — Nombor Cukai Pendapatan | both | ✅ | 11, 12, 13 | — | `C1234567890` |
 | `NG` | Nigeria | `tin` | TIN — Taxpayer Identification Number | both | ✅ | 8, 9, 10 | — | `12345678` |
@@ -117,6 +125,7 @@ order — the first structural match wins when you don't name a scheme.
 | `NL` | Netherlands | `bsn` | BSN — Burgerservicenummer | natural | — | 9 | ✅ | `123456782` |
 | `NO` | Norway | `mva` | MVA-nummer — VAT number | legal | ✅ | 12 | ✅ | `974760673MVA` |
 | `NO` | Norway | `orgnr` | Organisasjonsnummer | legal | — | 9 | ✅ | `974760673` |
+| `NO` | Norway | `fodselsnummer` | Fødselsnummer — national identity number | natural | — | 11 | ✅ | `01019012480` |
 | `NZ` | New Zealand | `ird` | IRD number | both | ✅ | 8, 9 | ✅ | `490918507` |
 | `PA` | Panama | `ruc` | RUC — Registro Único de Contribuyentes | both | ✅ | 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 | — | `155646463225` |
 | `PE` | Peru | `ruc` | RUC — Registro Único de Contribuyentes | both | ✅ | 11 | ✅ | `20100070970` |

@@ -11,10 +11,10 @@ formatting and taxpayer resolution — that is also usable **standalone**, outsi
 - PHP `^8.3`. CodeIgniter 4 `^4.6` is a **dev-only peer dependency** (`require-dev`), never a hard
   `require` — the core works with CI4 not installed at all. The only runtime extension required is
   `ext-simplexml` (the VIES SOAP response parser).
-- **Current status: v1.0.** 94 jurisdictions, 136 schemes, 77 national check-digit validators
-  covering 88 of those schemes. 1,284 tests / 3,322 assertions green, PHPStan level 8 clean (`src` + `tests`, with the
-  `codeigniter/phpstan-codeigniter` extension), PSR-12 clean. Trust `composer test`'s output over the
-  numbers written here.
+- **Current status: v1.1.** 94 jurisdictions, 145 schemes, 84 national check-digit validators
+  covering 95 of those schemes. 1,371 tests / 3,599 assertions green, PHPStan level 8 clean (`src` +
+  `tests`, with the `codeigniter/phpstan-codeigniter` extension), PSR-12 clean. Trust
+  `composer test`'s output over the numbers written here.
 - Sibling package this one deliberately mirrors: [`daycry/iban`](https://github.com/daycry/iban-calculator)
   — same two-layer architecture, same tooling, same doc set, same enforcement test.
 
@@ -50,7 +50,7 @@ When you add or change a country, you are editing *data*, and the integrity test
   optional/additive ones, `ReservedValueDetectorInterface` and `RegistrationCheckInterface`.
 - `src/Core` — `Normalizer`, `SchemeDetector`, `DetectionResult`, `Validator`, `AnalysisResult`,
   `Parser`, `Formatter`, `CheckDigitValidatorFactory`, and `Core/Checksum/` (`Luhn`, `Mod97`,
-  `Iso7064`, `Weights`).
+  `Iso7064`, `Weights`, `Verhoeff`).
 - `src/DTO` — `Violation`, `ValidationResult`, `ParsedTaxId`, `EntityInfo`, `LookupResult`. All
   `final readonly`.
 - `src/Enums` — `ViolationCode` (backed `string`, 12 cases), `EntityType` (backed `string`),
@@ -59,7 +59,7 @@ When you add or change a country, you are editing *data*, and the integrity test
   (`final`, carries the `ValidationResult` via `result()`).
 - `src/Registry` — `Registry`, `PhpRegistryLoader`, `CountryProfile`, `TaxIdScheme` +
   `data/countries.php`.
-- `src/National` — 77 check-digit validators, all extending `AbstractNationalValidator`.
+- `src/National` — 84 check-digit validators, all extending `AbstractNationalValidator`.
 - `src/Resolver` — `Resolver`.
 
 **Framework-free but living in an un-guarded directory** (guarded individually by the architecture
@@ -107,12 +107,13 @@ platform resolution despite the missing lock file.
 src/
   Contracts/    7 interfaces (framework-free), 2 of them optional/additive
   Core/         Normalizer, SchemeDetector, DetectionResult, Validator, AnalysisResult, Parser,
-                 Formatter, CheckDigitValidatorFactory; Checksum/ (Luhn, Mod97, Iso7064, Weights)
+                 Formatter, CheckDigitValidatorFactory; Checksum/ (Luhn, Mod97, Iso7064, Weights,
+                 Verhoeff)
   DTO/          final readonly VOs: Violation, ValidationResult, ParsedTaxId, EntityInfo, LookupResult
   Enums/        ViolationCode (12 cases), EntityType, TaxIdFormat
   Exceptions/   TaxIdException, InvalidTaxIdException
   Registry/     Registry, PhpRegistryLoader, CountryProfile, TaxIdScheme + data/countries.php
-  National/     77 check-digit validators + AbstractNationalValidator
+  National/     84 check-digit validators + AbstractNationalValidator
   Resolver/     Resolver — validates, then consults a provider; never the other way round
   Providers/    NullProvider, ChainProvider (framework-free); ViesProvider, DatabaseProvider,
                  CachedProvider (CI4)
@@ -134,7 +135,7 @@ docs/
   formatting.md           Compact/Print/Anonymized reference and the mask language
   i18n.md                 message i18n decision (English core, optional CI4 Language/)
   licensing.md            data-authoring and privacy rationale
-  roadmap.md              what v1.0 covers and what is deliberately out of scope
+  roadmap.md              what v1.0 and v1.1 cover and what is deliberately out of scope
   superpowers/specs/2026-07-27-daycry-taxid-v1-design.md   the frozen design spec
 CHANGELOG.md    Keep a Changelog history
 ```

@@ -2,13 +2,13 @@
 
 What each bundled check digit actually is, and — just as important — where the gaps are.
 
-Of 136 schemes, **88 verify a real check digit**. The other 48 validate structure only. This file
+Of 145 schemes, **95 verify a real check digit**. The other 50 validate structure only. This file
 says which is which and why, because "no checksum" is a meaningful limitation and hiding it would be
 worse than not shipping the country at all.
 
-## The four primitives
+## The five primitives
 
-Nearly every national algorithm is one of four ideas with different constants. They live in
+Nearly every national algorithm is one of five ideas with different constants. They live in
 `src/Core/Checksum/` and are tested directly against published reference values, because a bug in one
 of them is a bug in dozens of countries at once.
 
@@ -18,6 +18,7 @@ of them is a bug in dozens of countries at once.
 | `Luhn` | ISO/IEC 7812-1 mod-10, double every second digit from the right. | FR, SE, IT, CA, IL, and (over base 36) IN. |
 | `Mod97` | Long numeric strings mod 97, computed digit by digit. | BE, GB, FR's TVA key, NL's post-2020 rule. |
 | `Iso7064` | The ISO check-character standard: MOD 11,10 / MOD 11-2 / MOD 37,36. | HR, RS, DE, CN. |
+| `Verhoeff` | Dihedral-group D₅ folding; catches every adjacent transposition, which Luhn does not. | Luxembourg |
 
 The two mod-11 conventions are worth knowing apart, since the same modulus produces different digits:
 
@@ -31,6 +32,7 @@ The two mod-11 conventions are worth knowing apart, since the same modulus produ
 | Country | Scheme | Algorithm |
 | --- | --- | --- |
 | AT | `uid` | Alternating 1/2 weighting over 7 digits, digit-summed, closed at `(96 − total) mod 10`. |
+| AT | `steuernummer` | Luhn over all nine digits — the published odd-position table `0246813579` *is* "double, subtract 9 if over 9", verified identical across 100 000 bodies. The Finanzamt code is not checked. |
 | BE | `vat` | Last two digits = `97 − (first eight mod 97)`. Nine-digit legacy form left-padded. |
 | BE | `nn` | Same mod-97 rule; born-2000-or-later needs a literal `2` prefixed, so both readings are tried. |
 | BG | `eik` | Weights 1…8, retrying with 3…10 on a remainder of 10; the 13-digit form adds a second pass. |
@@ -46,24 +48,32 @@ The two mod-11 conventions are worth knowing apart, since the same modulus produ
 | ES | `nif`, `nie` | `number mod 23` indexes `TRWAGMYFPDXBNJZSQVHLCKE`. NIE's leading X/Y/Z stands for 0/1/2. |
 | ES | `cif` | Luhn-style sum over 7 digits; whether the control is a digit or a letter depends on the organisation letter. |
 | FI | `ytunnus` | Weights `7 9 10 5 8 4 2`, mod-11; a remainder of 1 is unissuable. |
+| FI | `henkilotunnus` | The nine digits of date and serial read as one integer, mod 31, indexing `0123456789ABCDEFHJKLMNPRSTUVWXY` (no G, I, O, Q, Z). The century marker takes no part, which is why ten- and eleven-character forms both validate. |
 | FR | `siren`, `siret` | Luhn, with La Poste's documented exception (digit sum divisible by 5). |
 | FR | `tva` | Numeric key = `(12 + 3 × (SIREN mod 97)) mod 97`. **Alphabetic keys are not verifiable** — see below. |
+| FR | `spi` | Last three digits = first ten mod 511. Accumulated digit by digit, since ten digits overflow a 32-bit integer. |
 | GB | `vat` | Weights 8…2 plus the two check digits, total divisible by 97 — **or** by 97 after adding 55 (the "9755" series). `GD`/`HA` numbers have no checksum. |
 | GR | `afm` | Weights are powers of two, 256…2, mod-11 with 10 folded to 0. |
 | HR | `oib` | ISO 7064 MOD 11,10. |
 | HU | `anum`, `adoszam` | Weights `9731973` over the first eight digits, closed mod 10. |
+| HU | `adoazonosito` | Each of the first nine digits times its own position, mod 11; a remainder of 10 is unissuable rather than folded. Always begins with 8. |
 | IE | `vat` | Weights 8…2 mod 23 → `WABCDEFGHIJKLMNOPQRSTUV`; the post-2013 trailing letter joins with weight 9. |
 | IS | `kennitala` | Weights `32765432`, mod-11. Companies add 40 to the day field. |
 | IT | `piva` | Luhn. |
 | IT | `cf` | Two 36-entry lookup tables (odd/even position), total mod 26. Omocodia substitutions handled. |
 | LT | `pvm` | Weights counting up from 1, wrapping after 9; retried shifted by two on a remainder of 10. |
+| LT | `asmens_kodas` | Two-pass mod-11, weights 1…9,1 then 3…9,1,2,3 — identical to Estonia's isikukood. The date is checked unless the leading digit is 9. |
 | LU | `vat` | Last two digits = first six mod 89. |
+| LU | `matricule` | Two check digits over the **same** first eleven digits: Luhn in the twelfth, Verhoeff in the thirteenth. |
 | LV | `vat` | Weights `9148310257 6` with the documented `9…`/remainder-4 correction. Person-shaped codes fall through to the personal-code scheme. |
 | LV | `personas_kods` | `(1101 − sum) mod 11 mod 10`. |
 | MT | `vat` | Weights `346789` over six digits, `37 − (sum mod 37)`. |
+| MT | `id_card` | **No checksum.** Seven digits and a category letter (A, B, G, H, L, M, P, Z); the letter is a category, not a verifier. |
+| MT | `tin` | **No checksum and no structure** — the nine-digit TIN of a non-national. Length and character set are all there is. |
 | NL | `vat` | Classic elfproef, **or** a mod-97 rule over the letter-expanded string for post-2020 numbers. |
 | NL | `bsn` | Elfproef with the ninth digit subtracted rather than added. |
 | NO | `orgnr`, `mva` | Weights `32765432`, mod-11. |
+| NO | `fodselsnummer` | Two mod-11 complements, weights `376189452` then `5432765432`; a digit computing to 10 is unissuable. Day +40 is a D-number (accepted); month +40 is an H-number (refused despite a valid checksum). |
 | PL | `nip` | Weights `657234567`, remainder is the check digit; 10 is unissuable. |
 | PL | `pesel` | Weights 1,3,7,9 repeating, closed mod 10. |
 | PL | `regon` | Weights `89234567` (9 digits) / `2485097361248` (14), remainder mod 11 with 10 → 0. |
@@ -158,3 +168,20 @@ Every algorithm has its own test with real branches and digit-flipped negatives
 (`tests/National/`), and the data-integrity test bumps each digit of every bundled example and
 requires at least half the mutations to be rejected. If you believe one of these is wrong, that test
 is the fastest way to prove it: add the number you think should validate, and watch it fail.
+
+### Sources for the 1.1.0 natural-person schemes
+
+Six of the nine were verified against a reference implementation read directly: Austria, Finland,
+France, Lithuania and Norway against `python-stdnum`, and Luxembourg against a published
+implementation of the CCSS rule, whose own page blocks automated fetching and was read only as a
+quotation.
+
+Three rest on secondary sources, and that is worth knowing before debugging a rejected identifier:
+
+- **Malta** — the OECD and EU TIN country sheets, read as published summaries rather than from the
+  PDFs. Neither Maltese scheme carries a checksum, so a misreading here can only mis-shape a
+  pattern.
+- **Hungary** — a restatement of the NAV rule rather than the rule itself. It is the one algorithm
+  in the batch with a real check digit and no primary source, so it is the first place to look if a
+  valid Hungarian identifier is ever refused. Its unissuable-remainder branch is pinned by
+  `testHungarianPersonalIdRejectsTheUnwritableRemainder`.
