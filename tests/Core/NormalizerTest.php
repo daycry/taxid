@@ -77,6 +77,7 @@ final class NormalizerTest extends TestCase
     {
         $result = (new TaxId())->validate('1234+5678Z', 'ES');
 
-        self::assertNotSame(ViolationCode::IllegalCharacters, $result->errorCode());
+        self::assertNotSame(ViolationCode::IllegalCharacters->value, $result->errorCode());
+        self::assertTrue($result->isValid());
     }
 }

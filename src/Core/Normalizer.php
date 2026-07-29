@@ -9,9 +9,9 @@ namespace Daycry\TaxId\Core;
  *
  * Purely mechanical and non-judgmental: uppercase, then drop whitespace and the
  * separators humans actually type into a tax ID — `.`, `-`, `+`, `/`, `\`, `_`,
- * `(`, `)`, `[`, `]`, `:`, `,`, `'`. The `+` earns its place through Finland,
- * whose henkilötunnus uses it as the century marker for the 1800s. So `12.345.678-Z`, `12 345 678 Z` and
- * `12345678z` all become `12345678Z`.
+ * `(`, `)`, `[`, `]`, `:`, `,`, `'`. So `12.345.678-Z`, `12 345 678 Z` and
+ * `12345678z` all become `12345678Z`. The `+` earns its place through Finland,
+ * whose henkilötunnus uses it as the century marker for the 1800s.
  *
  * What it deliberately does **not** do:
  *
