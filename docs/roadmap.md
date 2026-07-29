@@ -4,7 +4,7 @@
 
 The whole of it, in one list:
 
-- **94 jurisdictions, 145 schemes**, 95 of them with a verified check digit. The full matrix is in
+- **94 jurisdictions, 136 schemes**, 88 of them with a verified check digit. The full matrix is in
   [countries.md](countries.md).
 - **Framework-free core** — validation, parsing and formatting with zero dependencies, enforced by
   `tests/Architecture/CoreIsFrameworkFreeTest.php` rather than by good intentions.
@@ -19,6 +19,21 @@ The whole of it, in one list:
 - **CI4 integration**: `service('taxid')`, a twelve-function helper, five spark commands, a
   publishable config, a migration and a model.
 - 1,284 tests, PHPStan level 8, PSR-12, no network access in the suite.
+
+## v1.1 — shipped
+
+Natural-person identifiers for eight countries that v1.0 covered only through their corporate
+number.
+
+- **Nine schemes**, taking the registry to **145 schemes**, 95 of them with a verified check digit,
+  across the same 94 jurisdictions: `AT/steuernummer`, `FI/henkilotunnus`, `FR/spi`,
+  `HU/adoazonosito`, `LT/asmens_kodas`, `LU/matricule`, `MT/id_card`, `MT/tin`, `NO/fodselsnummer`.
+- **A fifth checksum primitive**, `Verhoeff`, taking the validator count to 84. Luxembourg pairs it
+  with a Luhn digit over the same eleven-digit base, because Luhn is blind to an adjacent
+  transposition whose digits differ by five.
+- **`+` is a separator during normalization**, in every country — Finland's century marker for the
+  1800s is a literal plus, and it could never reach a pattern before.
+- 1,370 tests, PHPStan level 8, PSR-12, still no network access in the suite.
 
 ## Deliberately out of scope
 
