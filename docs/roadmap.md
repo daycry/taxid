@@ -45,7 +45,7 @@ One scheme, correcting an inconsistency inside the registry rather than adding a
   as `CZ` and was refused as `SK`.
 - **`SK/vat` is `entity: both`, not `legal`.** The IČ DPH is the DIČ with an SK prefix, and the
   DIČ is issued to sole traders as well as companies.
-- 1,382 tests, PHPStan level 8, PSR-12, still no network access in the suite.
+- 1,383 tests, PHPStan level 8, PSR-12, still no network access in the suite.
 
 ## Deliberately out of scope
 

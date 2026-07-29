@@ -124,7 +124,7 @@ level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere i
 v1.1: 94 jurisdictions, 145 schemes, 95 of them with a verified check digit. 1,371 tests, PHPStan
 level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere in the suite.
 
-v1.2: 94 jurisdictions, 146 schemes, 96 of them with a verified check digit. 1,382 tests, PHPStan
+v1.2: 94 jurisdictions, 146 schemes, 96 of them with a verified check digit. 1,383 tests, PHPStan
 level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere in the suite.
 
 ## References

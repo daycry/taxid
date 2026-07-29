@@ -547,4 +547,33 @@ final class EuropeValidatorsTest extends TestCase
         self::assertTrue($this->taxid->isValid('9051011233', 'SK', 'rodne_cislo'));
         self::assertFalse($this->taxid->isValid('9063011232', 'SK', 'rodne_cislo'));
     }
+
+    /**
+     * Cyprus encodes the taxpayer's kind in the leading digit — an individual's
+     * TIC began with 0 or 9 before March 2023, and every code issued since then
+     * begins with 6 — and the TIC doubles as the VAT number, so one scheme must
+     * accept all of them.
+     *
+     * The reason this test exists is Slovakia. There, the ten-digit scheme
+     * constrained the *third* digit to a six-of-ten set encoding taxpayer
+     * category, which silently made every natural person's birth number
+     * unmatchable. `CyVatValidator` legitimately refuses one prefix — 12 was
+     * never issued — and this pins the boundary between that and refusing a
+     * category: the never-issued range stays refused, the taxpayer ranges stay
+     * accepted.
+     */
+    public function testCypriotIndividualAndPost2023RangesAreAllAccepted(): void
+    {
+        self::assertTrue($this->taxid->isValid('00123456H', 'CY'), 'individual, pre-2023 leading 0');
+        self::assertTrue($this->taxid->isValid('90123456B', 'CY'), 'individual, pre-2023 leading 9');
+        self::assertTrue($this->taxid->isValid('60012345N', 'CY'), 'any code issued since 27 March 2023');
+
+        // The one documented exclusion, and the only one there should ever be.
+        foreach (range('A', 'Z') as $letter) {
+            self::assertFalse(
+                $this->taxid->isValid('12345678' . $letter, 'CY'),
+                'A registration starting 12 was never issued and must stay refused.',
+            );
+        }
+    }
 }

@@ -41,6 +41,12 @@ it.
 
 ### Notes
 
+- **The other five countries v1.1 dismissed on the same reasoning were re-examined, and four of
+  them hold up.** Greece, Croatia and Slovenia constrain no digit position at all, and Cyprus refuses
+  only the never-issued `12` prefix — verified by confirming that every leading digit 0-9 still admits
+  a valid value in all four. Cyprus keeps a regression test pinning its individual ranges (leading 0
+  or 9 before March 2023) and the post-2023 range (leading 6), since it is the only one of the four
+  with a prefix exclusion that a future rule could widen into a category exclusion.
 - v1.1's design spec claimed Slovakia was **not** a coverage gap, on the grounds that its personal
   and corporate identifiers share one format. They do not, and the claim is withdrawn here. The
   spec's own caveat — that a `check_digit_failed` verdict proves the structure is accepted, not that
