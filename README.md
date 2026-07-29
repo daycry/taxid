@@ -138,7 +138,7 @@ full matrix with lengths, entity types and which schemes are checksummed.
 - ✅ **Optional VIES lookup** for EU VAT numbers, with a three-state answer that never confuses
   "the service was down" with "not registered".
 - ✅ **Framework-free core** — enforced by a test, not a promise.
-- ✅ PHPStan level 8, PSR-12, 1,383 tests.
+- ✅ PHPStan level 8, PSR-12, 1,533 tests.
 
 ## Resolving a taxpayer (optional)
 

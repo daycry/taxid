@@ -39,6 +39,23 @@ it.
   valid DIČ still reads as one; a birth number falls through to `rodne_cislo`. This is the same
   documented multi-scheme behaviour Germany and the United States already rely on.
 
+### Fixed
+
+- **`IE/vat` computed the wrong check letter for the old individual style** (`1A23456W`) — a
+  behaviour change, called out by name as this project's versioning note requires. In that form the
+  leading digit moves to the **end** of the checksum body, which reads as `0` + the five middle
+  digits + that digit. The old code built `0` + five digits and stopped, so the leading digit never
+  entered the sum and the weight loop then ran off the end of a six-character string, emitting
+  `Warning: Uninitialized string offset 6`. Values of this form that were accepted before are now
+  rejected and vice versa; the other two Irish formats are untouched, which is why the bundled
+  examples never caught it.
+- **`docs/countries.md` claimed to be generated, and no generator ever existed.** The claim is now
+  true in the only way that lasts: `tests/Registry/CountriesDocIsInSyncTest.php` compares every cell
+  of all 146 rows against the registry in both directions, plus the header counts and the row order.
+  Three consecutive releases each needed a correction round for numbers that had drifted in that
+  file; a drifted table now fails CI instead. `docs/adding-a-country.md` no longer tells
+  contributors to regenerate a file that nothing regenerates.
+
 ### Notes
 
 - **The other five countries v1.1 dismissed on the same reasoning were re-examined, and four of
