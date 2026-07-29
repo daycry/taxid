@@ -109,7 +109,7 @@ Rules the base class and the contract impose:
 
 ### Reuse the primitives
 
-`src/Core/Checksum/` already has the four building blocks most algorithms need:
+`src/Core/Checksum/` already has the five building blocks most algorithms need:
 
 | Class | Use it for |
 | --- | --- |
@@ -119,6 +119,7 @@ Rules the base class and the contract impose:
 | `Luhn` | Mod-10 double-every-second (France, Sweden, Canada, Israel, Italy). |
 | `Mod97` | Long numeric strings mod 97 (Belgium, the UK). |
 | `Iso7064` | MOD 11,10 (Croatia, Serbia, Germany), MOD 11-2 (China), MOD 37,36. |
+| `Verhoeff` | Catches adjacent transpositions Luhn misses (Luxembourg's matricule, paired with Luhn). |
 
 Only hand-roll the arithmetic when the algorithm genuinely doesn't fit — Türkiye's VKN and Korea's
 BRN are the two bundled cases that don't.

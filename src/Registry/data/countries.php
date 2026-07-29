@@ -1178,7 +1178,11 @@ return [
                 'lengths'     => [8, 9],
                 'check_digit' => IeVatValidator::class,
                 'examples'    => ['1234567T', '1234567FA'],
-                'notes'       => 'Three coexisting formats: pre-2013, post-2013 and the old individual style.',
+                'notes'       => 'Three coexisting formats: pre-2013, post-2013 and the old individual style. '
+                    . 'That old individual style\'s "+"/"*" second character is not matchable: '
+                    . 'normalization strips "+" before any pattern sees it, and "*" fails the '
+                    . 'illegal-character gate first — both were already unreachable before "+" became '
+                    . 'a separator, so this is a pre-existing gap, not a regression.',
             ],
         ],
     ],

@@ -28,9 +28,9 @@ number.
 - **Nine schemes**, taking the registry to **145 schemes**, 95 of them with a verified check digit,
   across the same 94 jurisdictions: `AT/steuernummer`, `FI/henkilotunnus`, `FR/spi`,
   `HU/adoazonosito`, `LT/asmens_kodas`, `LU/matricule`, `MT/id_card`, `MT/tin`, `NO/fodselsnummer`.
-- **A fifth checksum primitive**, `Verhoeff`, taking the validator count to 84. Luxembourg pairs it
-  with a Luhn digit over the same eleven-digit base, because Luhn is blind to an adjacent
-  transposition whose digits differ by five.
+- **Seven new national validators**, taking the validator count to 84, plus a fifth checksum
+  primitive, `Verhoeff`. Luxembourg pairs it with a Luhn digit over the same eleven-digit base,
+  because Luhn is blind to an adjacent transposition whose digits differ by five.
 - **`+` is a separator during normalization**, in every country — Finland's century marker for the
   1800s is a literal plus, and it could never reach a pattern before.
 - 1,370 tests, PHPStan level 8, PSR-12, still no network access in the suite.

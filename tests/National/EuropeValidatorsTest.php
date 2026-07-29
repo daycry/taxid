@@ -80,7 +80,7 @@ final class EuropeValidatorsTest extends TestCase
             ['1990010112386', '1990010112395', '199001011238'],
         ];
         yield 'AT UID' => ['AT', 'uid', ['U10223006'], ['U10223007']];
-        yield 'AT Steuernummer' => ['AT', 'steuernummer', ['123456782', '591199013'], ['123456783', '12345678', '1234567820']];
+        yield 'AT Steuernummer' => ['AT', 'steuernummer', ['123456782', '010190007'], ['123456783', '12345678', '1234567820']];
         yield 'DK CVR' => ['DK', 'cvr', ['13585628'], ['13585629']];
 
         yield 'SE orgnr'        => ['SE', 'orgnr', ['5560360793'], ['5560360794']];
@@ -127,7 +127,19 @@ final class EuropeValidatorsTest extends TestCase
         yield 'GB NINO' => ['GB', 'nino', ['AB123456C'], ['DB123456C', 'AB123456E']];
 
         yield 'EE VAT'       => ['EE', 'vat', ['100594102'], ['100594103']];
-        yield 'EE isikukood' => ['EE', 'isikukood', ['37605030299'], ['37605030298']];
+        yield 'EE isikukood' => [
+            'EE',
+            'isikukood',
+            [
+                '37605030299',
+                // Same second-pass and fold-to-zero gap as LT asmens kodas — the
+                // two classes share the algorithm verbatim (see
+                // EeIsikukoodValidator's docblock), so the exposure is doubled.
+                '30001010187',
+                '10001010080',
+            ],
+            ['37605030298'],
+        ];
 
         yield 'LV VAT'           => ['LV', 'vat', ['40003009497'], ['40003009498']];
         yield 'LV personas kods' => ['LV', 'personas_kods', ['32081012341'], ['32081012342']];
@@ -136,12 +148,20 @@ final class EuropeValidatorsTest extends TestCase
         yield 'LT asmens kodas' => [
             'LT',
             'asmens_kodas',
-            ['39001011237', '49001011238', '90000001235'],
+            [
+                '39001011237', '49001011238', '90000001235',
+                // First-pass remainder 10: forces WEIGHTS_SECOND, which no other
+                // value in the suite reaches.
+                '30001010187',
+                // First-pass remainder 10, second pass ALSO 10: exercises the
+                // fold to 0, otherwise untested in the whole suite.
+                '10001010080',
+            ],
             ['39001011238', '79001011237', '39013011237', '3900101123'],
         ];
         yield 'MT VAT' => ['MT', 'vat', ['12345634'], ['12345635']];
         yield 'MT ID card' => ['MT', 'id_card', ['0123456M', '0000123G'], ['0123456K', '01234567', '123456M']];
-        yield 'MT TIN'     => ['MT', 'tin', ['123456789'], ['12345678', '1234567890']];
+        yield 'MT TIN'     => ['MT', 'tin', ['123456789'], ['12345678', '1234567890', '12345678A']];
         yield 'CY VAT' => ['CY', 'vat', ['10259033P'], ['10259033Q']];
 
         yield 'NO orgnr' => ['NO', 'orgnr', ['974760673'], ['974760674']];
@@ -264,6 +284,29 @@ final class EuropeValidatorsTest extends TestCase
     {
         self::assertTrue($this->taxid->isValid('XI123456782'));
         self::assertSame('XI', $this->taxid->parse('XI123456782')->countryCode);
+    }
+
+    /**
+     * Ireland's legacy VAT "individual style" allows a `+` or `*` as its second
+     * character (`1+23456T`), but `Normalizer` treats `+` as a separator, so it
+     * is stripped before any pattern sees the value — `1+23456T` becomes the
+     * unmatchable seven-character `123456T`.
+     *
+     * This is deliberate, not a regression to "fix": the form was already
+     * unreachable before `+` became a separator, since it was refused upstream
+     * by the `IllegalCharacters` gate. Only the reported violation code
+     * changed, from `illegal_characters` to `bad_length` — no value that used
+     * to validate stopped validating. Exempting `+` from stripping inside an
+     * Irish value would need registry-aware normalization, which `Normalizer`
+     * deliberately does not have (see its class docblock); "fixing" this here
+     * would reopen a form nothing else in the registry recognises anyway.
+     */
+    public function testIrishLegacyIndividualVatWithPlusIsUnreachable(): void
+    {
+        $result = $this->taxid->validate('1+23456T', 'IE', 'vat');
+
+        self::assertFalse($result->isValid());
+        self::assertSame('bad_length', $result->errorCode());
     }
 
     /**

@@ -135,7 +135,7 @@ docs/
   formatting.md           Compact/Print/Anonymized reference and the mask language
   i18n.md                 message i18n decision (English core, optional CI4 Language/)
   licensing.md            data-authoring and privacy rationale
-  roadmap.md              what v1.0 covers and what is deliberately out of scope
+  roadmap.md              what v1.0 and v1.1 cover and what is deliberately out of scope
   superpowers/specs/2026-07-27-daycry-taxid-v1-design.md   the frozen design spec
 CHANGELOG.md    Keep a Changelog history
 ```

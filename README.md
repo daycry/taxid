@@ -213,7 +213,7 @@ being true.
 | [docs/formatting.md](docs/formatting.md) | Format reference and the print-mask language |
 | [docs/i18n.md](docs/i18n.md) | Translating violation messages |
 | [docs/licensing.md](docs/licensing.md) | Data authoring and privacy |
-| [docs/roadmap.md](docs/roadmap.md) | What v1.0 covers, and what it deliberately doesn't |
+| [docs/roadmap.md](docs/roadmap.md) | What v1.0 and v1.1 cover, and what it deliberately doesn't |
 
 ## Development
 

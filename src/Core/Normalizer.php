@@ -13,6 +13,15 @@ namespace Daycry\TaxId\Core;
  * `12345678z` all become `12345678Z`. The `+` earns its place through Finland,
  * whose henkilötunnus uses it as the century marker for the 1800s.
  *
+ * One registry entry collides with that widening: Ireland's legacy VAT
+ * "individual style" admits a literal `+` (or `*`) as its second character
+ * (`1+23456T`), and stripping the `+` here leaves a seven-character value that
+ * no pattern in the registry accepts. That is not a regression — the form was
+ * already unreachable before this class treated `+` as a separator, refused
+ * upstream by {@see \Daycry\TaxId\Core\Validator}'s `IllegalCharacters` gate —
+ * so no value that used to validate changed meaning. See
+ * {@see \Daycry\TaxId\National\IeVatValidator}.
+ *
  * What it deliberately does **not** do:
  *
  * - validate anything, or drop characters it doesn't recognise. An `@` survives

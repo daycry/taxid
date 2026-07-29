@@ -20,8 +20,9 @@ use Daycry\TaxId\Core\Checksum\Weights;
  * identifiers that were never issued, so it is rejected instead.
  *
  * Digits two to six encode the birth date as the number of days elapsed since
- * 1 January 1867. That is not decoded — nothing in the checksum depends on it,
- * and a date this validator cannot see is a date it cannot get wrong.
+ * 1 January 1867. That is not decoded — they are weighted and summed like any
+ * other digit, but nothing depends on what they *mean*, and a date this
+ * validator cannot see is a date it cannot get wrong.
  */
 final class HuAdoazonositoValidator extends AbstractNationalValidator
 {

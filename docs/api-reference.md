@@ -364,6 +364,14 @@ registry data is wrong.
 
 `isValid(string $digits): bool` · `checkDigit(string $payload): int`
 
+### `Verhoeff`
+
+`isValid(string $digits): bool` — `$digits` is the payload **including** its trailing check digit.
+`checkDigit(string $payload): int` — `$payload` is the same value **without** it. Needed because
+Luhn and `Weights` both work in ℤ/10ℤ, where an adjacent transposition whose two digits differ by
+five can cancel itself out; Verhoeff's non-commutative D₅ multiplication misses none. Luxembourg's
+matricule pairs a Verhoeff digit with a Luhn digit over the same base for exactly that reason.
+
 ### `Mod97`
 
 `remainder(string $numeric): int` — digit by digit, so arbitrarily long strings work without bcmath.
