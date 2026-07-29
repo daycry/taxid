@@ -35,6 +35,7 @@ use Daycry\TaxId\National\EsDniValidator;
 use Daycry\TaxId\National\FiHenkilotunnusValidator;
 use Daycry\TaxId\National\FiYtunnusValidator;
 use Daycry\TaxId\National\FrSirenValidator;
+use Daycry\TaxId\National\FrSpiValidator;
 use Daycry\TaxId\National\FrTvaValidator;
 use Daycry\TaxId\National\GbVatValidator;
 use Daycry\TaxId\National\GrAfmValidator;
@@ -941,6 +942,18 @@ return [
                 'check_digit'        => FrSirenValidator::class,
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['552100554'],
+            ],
+            [
+                'code'               => 'spi',
+                'name'               => 'Numéro fiscal de référence (SPI)',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^[0-3]\d{12}$/',
+                'lengths'            => [13],
+                'check_digit'        => FrSpiValidator::class,
+                'check_digit_offset' => [-3, 3],
+                'examples'           => ['1234567890066'],
+                'notes'              => 'Also called the numéro fiscal, printed on the avis d\'imposition. The last three digits are the first ten modulo 511. No mask: the tax office prints it as one block.',
             ],
         ],
     ],
