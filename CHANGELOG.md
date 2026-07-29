@@ -12,6 +12,43 @@ the old behaviour was a bug. Such corrections are always called out here by name
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-28
+
+Natural-person tax identifiers for eight countries that were covered only by their corporate
+identifier. A person's number in Austria, Finland, France, Hungary, Lithuania, Luxembourg, Malta or
+Norway previously failed with `bad_length` or `malformed_structure`.
+
+### Added
+
+- **Nine schemes**, taking the registry to 145 schemes across the same 94 jurisdictions, 95 of them
+  with a verified check digit: `AT/steuernummer`, `FI/henkilotunnus`, `FR/spi`, `HU/adoazonosito`,
+  `LT/asmens_kodas`, `LU/matricule`, `MT/id_card`, `MT/tin`, `NO/fodselsnummer`.
+- **Seven check-digit validators** in `src/National/`, taking the count to 84. `MT/id_card` and
+  `MT/tin` are structural only — Malta publishes no checksum for either — and say so in their
+  registry `notes`.
+- **`Core\Checksum\Verhoeff`**, a fifth shared primitive. Luxembourg's matricule pairs a Luhn digit
+  with a Verhoeff one over the same eleven-digit base, because Luhn is blind to an adjacent
+  transposition whose digits differ by five and Verhoeff is not.
+- `AT/steuernummer` is `entity: both`: the Abgabenkontonummer is issued to individuals and companies
+  alike.
+
+### Changed
+
+- **`Normalizer` now treats `+` as a separator**, in every country. Finland's henkilötunnus uses it
+  as the century marker for the 1800s, and `IllegalCharacters` is checked before any scheme is
+  consulted, so the character could never reach a pattern. This only widens what validates: a value
+  containing `+` returned `illegal_characters` before, so nothing that already validated changes
+  meaning. One consequence worth knowing: a Finnish identity code written with `+` or `-` normalizes
+  to **ten** characters, while one written with a letter marker keeps **eleven**. Both are correct
+  and both validate; the marker never enters the checksum.
+
+### Notes
+
+- The nine algorithms are independently authored from published national rules and verified against
+  reference implementations, not against issued identifiers. Hungary's is the one with no primary
+  source available; see `docs/algorithms.md` for the per-algorithm provenance.
+- Bundled examples remain synthetic and checksum-valid.
+
 ## [1.0.0] - 2026-07-27
 
 First release. Validation, parsing, formatting and opt-in taxpayer resolution for tax identification
@@ -92,5 +129,6 @@ the reasoning:
 - The country is never guessed from an unprefixed value. A nine-digit number is a plausible tax ID in
   dozens of jurisdictions, so `CountryRequired` is the honest answer.
 
-[Unreleased]: https://github.com/daycry/taxid/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/daycry/taxid/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/daycry/taxid/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/daycry/taxid/releases/tag/v1.0.0
