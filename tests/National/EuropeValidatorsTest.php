@@ -140,6 +140,8 @@ final class EuropeValidatorsTest extends TestCase
             ['39001011238', '79001011237', '39013011237', '3900101123'],
         ];
         yield 'MT VAT' => ['MT', 'vat', ['12345634'], ['12345635']];
+        yield 'MT ID card' => ['MT', 'id_card', ['0123456M', '0000123G'], ['0123456K', '01234567', '123456M']];
+        yield 'MT TIN'     => ['MT', 'tin', ['123456789'], ['12345678', '1234567890']];
         yield 'CY VAT' => ['CY', 'vat', ['10259033P'], ['10259033Q']];
 
         yield 'NO orgnr' => ['NO', 'orgnr', ['974760673'], ['974760674']];
@@ -382,5 +384,39 @@ final class EuropeValidatorsTest extends TestCase
 
         // Verhoeff digit right, Luhn digit wrong.
         self::assertFalse($this->taxid->isValid('1990010112395', 'LU', 'matricule'));
+    }
+
+    /**
+     * Malta issues two different TINs to individuals, and both are structure
+     * only. A national's is their identity-card number, seven digits and a
+     * category letter — the letter is a category, not a check character, so it
+     * must be one of the eight that exist and nothing more can be verified. A
+     * non-national gets nine digits with nothing checkable at all.
+     *
+     * Leading zeros are part of the identity-card number. The short form 999L is
+     * the same value unpadded, and the padded form is what any system must store.
+     */
+    public function testMalteseIdentifiersAreStructureOnly(): void
+    {
+        self::assertTrue($this->taxid->isValid('0000123G', 'MT', 'id_card'));
+        self::assertFalse($this->taxid->isValid('123G', 'MT', 'id_card'), 'The unpadded short form is not the storable form.');
+
+        foreach (['A', 'B', 'G', 'H', 'L', 'M', 'P', 'Z'] as $category) {
+            self::assertTrue(
+                $this->taxid->isValid('0123456' . $category, 'MT', 'id_card'),
+                $category . ' is a real category letter and must be accepted.',
+            );
+        }
+
+        foreach (['C', 'D', 'K', 'X'] as $absent) {
+            self::assertFalse(
+                $this->taxid->isValid('0123456' . $absent, 'MT', 'id_card'),
+                $absent . ' is not a category letter and must be refused.',
+            );
+        }
+
+        // Nine digits is the non-national TIN and must not be read as an id_card.
+        self::assertTrue($this->taxid->isValid('123456789', 'MT', 'tin'));
+        self::assertFalse($this->taxid->isValid('123456789', 'MT', 'id_card'));
     }
 }
