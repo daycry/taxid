@@ -11,10 +11,10 @@ formatting and taxpayer resolution — that is also usable **standalone**, outsi
 - PHP `^8.3`. CodeIgniter 4 `^4.6` is a **dev-only peer dependency** (`require-dev`), never a hard
   `require` — the core works with CI4 not installed at all. The only runtime extension required is
   `ext-simplexml` (the VIES SOAP response parser).
-- **Current status: v1.0.** 94 jurisdictions, 145 schemes, 84 national check-digit validators
-  covering 95 of those schemes. 1,284 tests / 3,322 assertions green, PHPStan level 8 clean (`src` + `tests`, with the
-  `codeigniter/phpstan-codeigniter` extension), PSR-12 clean. Trust `composer test`'s output over the
-  numbers written here.
+- **Current status: v1.1.** 94 jurisdictions, 145 schemes, 84 national check-digit validators
+  covering 95 of those schemes. 1,370 tests / 3,592 assertions green, PHPStan level 8 clean (`src` +
+  `tests`, with the `codeigniter/phpstan-codeigniter` extension), PSR-12 clean. Trust
+  `composer test`'s output over the numbers written here.
 - Sibling package this one deliberately mirrors: [`daycry/iban`](https://github.com/daycry/iban-calculator)
   — same two-layer architecture, same tooling, same doc set, same enforcement test.
 

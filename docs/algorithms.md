@@ -18,7 +18,7 @@ of them is a bug in dozens of countries at once.
 | `Luhn` | ISO/IEC 7812-1 mod-10, double every second digit from the right. | FR, SE, IT, CA, IL, and (over base 36) IN. |
 | `Mod97` | Long numeric strings mod 97, computed digit by digit. | BE, GB, FR's TVA key, NL's post-2020 rule. |
 | `Iso7064` | The ISO check-character standard: MOD 11,10 / MOD 11-2 / MOD 37,36. | HR, RS, DE, CN. |
-| `Verhoeff` | Dihedral-group D₅ folding; catches every adjacent transposition, which Luhn does not | Luxembourg |
+| `Verhoeff` | Dihedral-group D₅ folding; catches every adjacent transposition, which Luhn does not. | Luxembourg |
 
 The two mod-11 conventions are worth knowing apart, since the same modulus produces different digits:
 
