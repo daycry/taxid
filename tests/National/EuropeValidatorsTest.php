@@ -146,6 +146,12 @@ final class EuropeValidatorsTest extends TestCase
 
         yield 'NO orgnr' => ['NO', 'orgnr', ['974760673'], ['974760674']];
         yield 'NO MVA'   => ['NO', 'mva', ['974760673MVA'], ['974760674MVA']];
+        yield 'NO fødselsnummer' => [
+            'NO',
+            'fodselsnummer',
+            ['01019012480', '41019012393'],
+            ['01419012382', '01019012481', '0101901248'],
+        ];
 
         yield 'IS kennitala' => ['IS', 'kennitala', ['1203894599'], ['1203894589', '9903894599']];
 
@@ -418,5 +424,26 @@ final class EuropeValidatorsTest extends TestCase
         // Nine digits is the non-national TIN and must not be read as an id_card.
         self::assertTrue($this->taxid->isValid('123456789', 'MT', 'tin'));
         self::assertFalse($this->taxid->isValid('123456789', 'MT', 'id_card'));
+    }
+
+    /**
+     * Norway offsets a field by 40 for two different purposes, and only one of
+     * them is a tax identifier. A D-number, issued to non-residents, adds 40 to
+     * the DAY and is a real fødselsnummer. An H-number adds 40 to the MONTH and
+     * exists only inside the health service.
+     *
+     * `01419012382` is the case that matters: its checksum is entirely valid, so
+     * it can only be refused by looking at the month. A validator that checks
+     * arithmetic alone accepts it.
+     */
+    public function testNorwegianDNumbersAreAcceptedAndHNumbersAreNot(): void
+    {
+        self::assertTrue($this->taxid->isValid('01019012480', 'NO', 'fodselsnummer'));
+
+        // D-number: day 01 + 40 = 41.
+        self::assertTrue($this->taxid->isValid('41019012393', 'NO', 'fodselsnummer'));
+
+        // H-number: month 01 + 40 = 41. Checksum valid, still not a tax ID.
+        self::assertFalse($this->taxid->isValid('01419012382', 'NO', 'fodselsnummer'));
     }
 }

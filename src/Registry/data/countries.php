@@ -60,6 +60,7 @@ use Daycry\TaxId\National\MtVatValidator;
 use Daycry\TaxId\National\MxRfcValidator;
 use Daycry\TaxId\National\NlBsnValidator;
 use Daycry\TaxId\National\NlBtwValidator;
+use Daycry\TaxId\National\NoFodselsnummerValidator;
 use Daycry\TaxId\National\NoOrgnrValidator;
 use Daycry\TaxId\National\NzIrdValidator;
 use Daycry\TaxId\National\PeRucValidator;
@@ -1753,6 +1754,19 @@ return [
                 'check_digit'        => NoOrgnrValidator::class,
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['974760673'],
+            ],
+            [
+                'code'               => 'fodselsnummer',
+                'name'               => 'Fødselsnummer — national identity number',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^\d{11}$/',
+                'lengths'            => [11],
+                'mask'               => '###### #####',
+                'check_digit'        => NoFodselsnummerValidator::class,
+                'check_digit_offset' => [-2, 2],
+                'examples'           => ['01019012480'],
+                'notes'              => 'Also covers the D-number issued to non-residents, whose day field is offset by 40. The H-number, which offsets the month instead and is used only inside the health service, is refused even though its checksum is valid.',
             ],
         ],
     ],
