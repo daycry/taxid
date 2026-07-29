@@ -4,7 +4,7 @@
 
 The whole of it, in one list:
 
-- **94 jurisdictions, 136 schemes**, 88 of them with a verified check digit. The full matrix is in
+- **94 jurisdictions, 145 schemes**, 95 of them with a verified check digit. The full matrix is in
   [countries.md](countries.md).
 - **Framework-free core** — validation, parsing and formatting with zero dependencies, enforced by
   `tests/Architecture/CoreIsFrameworkFreeTest.php` rather than by good intentions.

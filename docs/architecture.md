@@ -55,10 +55,10 @@ re-detecting, so parsing and validating can never disagree about which scheme wo
 
 **`Formatter`** — Compact, Print (a mask where `#` consumes one character) and Anonymized.
 
-**`Core/Checksum/`** — `Luhn`, `Mod97`, `Iso7064` and `Weights`, the four primitives the 77
-national validators are built from. A bug in one of them is a bug in dozens of countries at once,
-which is why they are tested directly against published reference values as well as through their
-callers.
+**`Core/Checksum/`** — `Luhn`, `Mod97`, `Iso7064`, `Weights` and `Verhoeff`, the five primitives
+the 84 national validators are built from. A bug in one of them is a bug in dozens of countries at
+once, which is why they are tested directly against published reference values as well as through
+their callers.
 
 ## Registry as data
 
@@ -119,6 +119,9 @@ and provides none.
 ## Status
 
 v1.0: 94 jurisdictions, 136 schemes, 88 of them with a verified check digit. 1,284 tests, PHPStan
+level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere in the suite.
+
+v1.1: 94 jurisdictions, 145 schemes, 95 of them with a verified check digit. 1,370 tests, PHPStan
 level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere in the suite.
 
 ## References
