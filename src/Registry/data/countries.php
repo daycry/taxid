@@ -78,6 +78,7 @@ use Daycry\TaxId\National\SePersonnummerValidator;
 use Daycry\TaxId\National\SeVatValidator;
 use Daycry\TaxId\National\SiVatValidator;
 use Daycry\TaxId\National\SkIcoValidator;
+use Daycry\TaxId\National\SkRodneCisloValidator;
 use Daycry\TaxId\National\SkVatValidator;
 use Daycry\TaxId\National\TrTcknValidator;
 use Daycry\TaxId\National\TrVknValidator;
@@ -2108,13 +2109,15 @@ return [
             [
                 'code'        => 'vat',
                 'name'        => 'IČ DPH — VAT number',
-                'entity'      => 'legal',
+                'entity'      => 'both',
                 'vat'         => true,
                 'pattern'     => '/^\d{10}$/',
                 'lengths'     => [10],
                 'check_digit' => SkVatValidator::class,
                 'examples'    => ['2020269922'],
-                'notes'       => 'No check digit: the whole number must be divisible by 11.',
+                'notes'       => 'The DIČ with an SK prefix, so it is issued to sole traders as well as '
+                    . 'companies. No check digit: the whole number must be divisible by 11, and the third '
+                    . 'digit encodes the taxpayer category. Overlaps rodne_cislo at ten digits.',
             ],
             [
                 'code'               => 'ico',
@@ -2127,6 +2130,22 @@ return [
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['31234569'],
                 'notes'              => 'Same algorithm as the Czech IČO — a shared Czechoslovak legacy.',
+            ],
+            [
+                'code'               => 'rodne_cislo',
+                'name'               => 'Rodné číslo — birth number',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^\d{9,10}$/',
+                'lengths'            => [9, 10],
+                'check_digit'        => SkRodneCisloValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['9001011239', '500101123'],
+                'notes'              => 'The same standard Czechia kept after 1993, so the algorithm is shared '
+                    . 'with CZ/dic. Ten digits carry a check digit — the first nine modulo eleven, with a '
+                    . 'remainder of ten written as 0 for 1954-1985 births; the nine-digit pre-1954 form has none, '
+                    . 'so only its date can be checked. The month field adds 50 for women and a further 20 since '
+                    . '2004. Overlaps vat at ten digits, which is declared first so a DIČ still reads as one.',
             ],
         ],
     ],

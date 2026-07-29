@@ -106,6 +106,15 @@ final class EuropeValidatorsTest extends TestCase
         yield 'SK VAT' => ['SK', 'vat', ['2020269922'], ['2020269923', '2120269922']];
         yield 'SK IČO' => ['SK', 'ico', ['31234569'], ['31234568']];
 
+        // The three date-invalid values all carry a CORRECT check digit, so each
+        // one can only be refused by looking at the encoded date.
+        yield 'SK rodné číslo' => [
+            'SK',
+            'rodne_cislo',
+            ['9001011239', '9051011233', '500101123'],
+            ['9001011238', '9013011238', '9001321230', '9063011232', '90010112'],
+        ];
+
         yield 'HU ANUM'    => ['HU', 'anum', ['10778757'], ['10778758']];
         yield 'HU adószám' => ['HU', 'adoszam', ['10778757443'], ['10778758443']];
         yield 'HU adóazonosító' => ['HU', 'adoazonosito', ['8123456786', '8401234565'], ['8123456787', '8000000130', '7123456786', '812345678']];
@@ -488,5 +497,54 @@ final class EuropeValidatorsTest extends TestCase
 
         // H-number: month 01 + 40 = 41. Checksum valid, still not a tax ID.
         self::assertFalse($this->taxid->isValid('01419012382', 'NO', 'fodselsnummer'));
+    }
+
+    /**
+     * Czechia and Slovakia both kept the Czechoslovak rodné číslo after 1993, so
+     * one value is a valid personal identifier in either country. Before Slovakia
+     * had a scheme for it, the same number validated as `CZ` and was refused as
+     * `SK` with `check_digit_failed` — a misleading code, since the checksum was
+     * fine and only the VAT category constraint had rejected it.
+     *
+     * This test is the pin against that asymmetry returning.
+     */
+    public function testTheCzechoslovakBirthNumberValidatesInBothSuccessorStates(): void
+    {
+        foreach (['7103191238', '9001011239'] as $tenDigits) {
+            self::assertTrue($this->taxid->isValid($tenDigits, 'CZ'), 'CZ should accept ' . $tenDigits);
+            self::assertTrue($this->taxid->isValid($tenDigits, 'SK'), 'SK should accept ' . $tenDigits);
+        }
+
+        // The nine-digit pre-1954 form, likewise.
+        self::assertTrue($this->taxid->isValid('500101123', 'CZ'));
+        self::assertTrue($this->taxid->isValid('500101123', 'SK'));
+    }
+
+    /**
+     * Slovakia's DIČ and its rodné číslo are different numbers that both take ten
+     * digits, so they overlap — which the Validator handles by trying every
+     * matching scheme. What must not happen is either one swallowing the other:
+     * a DIČ has to keep reading as `vat`, and a birth number as `rodne_cislo`.
+     */
+    public function testSlovakTenDigitSchemesDoNotShadowEachOther(): void
+    {
+        self::assertSame('vat', $this->taxid->parse('2020269922', 'SK')->scheme);
+        self::assertSame('rodne_cislo', $this->taxid->parse('9001011239', 'SK')->scheme);
+
+        // Demanding the wrong reading of either must fail rather than fall through.
+        self::assertFalse($this->taxid->isValid('2020269922', 'SK', 'rodne_cislo'));
+        self::assertFalse($this->taxid->isValid('9001011239', 'SK', 'vat'));
+    }
+
+    /**
+     * The month field carries the sex: women's numbers add 50, and since 2004 a
+     * further 20 when a day's serials run out. So 51 is January and must be
+     * accepted, while 63 reduces to month 13 and must not be — both values below
+     * carry a correct check digit, so only the date handling separates them.
+     */
+    public function testSlovakBirthNumberMonthOffsetsAreDecodedNotIgnored(): void
+    {
+        self::assertTrue($this->taxid->isValid('9051011233', 'SK', 'rodne_cislo'));
+        self::assertFalse($this->taxid->isValid('9063011232', 'SK', 'rodne_cislo'));
     }
 }

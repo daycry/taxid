@@ -2,7 +2,7 @@
 
 What each bundled check digit actually is, and — just as important — where the gaps are.
 
-Of 145 schemes, **95 verify a real check digit**. The other 50 validate structure only. This file
+Of 146 schemes, **96 verify a real check digit**. The other 50 validate structure only. This file
 says which is which and why, because "no checksum" is a meaningful limitation and hiding it would be
 worse than not shipping the country at all.
 
@@ -86,6 +86,7 @@ The two mod-11 conventions are worth knowing apart, since the same modulus produ
 | SI | `vat` | Weights 8…2, `11 − r`, 10 → 0, 11 invalid. |
 | SK | `vat` | No check digit: the whole ten-digit number must be divisible by 11, third digit in `234789`. |
 | SK | `ico` | Identical to the Czech IČO — a shared Czechoslovak standard. |
+| SK | `rodne_cislo` | The Czechoslovak birth number, shared verbatim with `CZ/dic`: ten digits carry a check digit (first nine mod 11, a remainder of 10 written as 0 for 1954-1985 births); the nine-digit pre-1954 form has none. Month +50 for women, +20 more since 2004. |
 | TR | `vkn` | Per-digit shift, powers of two, mod 9; closed mod 10. |
 | TR | `tckn` | Two check digits: `(7×odd − even) mod 10`, then the sum of the first ten mod 10. |
 

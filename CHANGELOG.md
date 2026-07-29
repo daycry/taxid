@@ -12,6 +12,40 @@ the old behaviour was a bug. Such corrections are always called out here by name
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-29
+
+Slovakia's natural-person identifier, and a correction to a claim v1.1's own design spec made about
+it.
+
+### Added
+
+- **`SK/rodne_cislo`** — the Slovak rodné číslo, nine or ten digits, taking the registry to 146
+  schemes, 96 of them with a verified check digit, and the validator count to 85. Czechia and
+  Slovakia both kept the Czechoslovak birth number after 1993, but only Czechia had a scheme for it:
+  the same personal identifier validated as `CZ` and was refused as `SK` with `check_digit_failed`.
+  That code was doubly misleading — the checksum was fine, and the value failed only because the
+  ten-digit Slovak scheme is a VAT number whose third digit must encode a taxpayer category a birth
+  number cannot carry.
+- The arithmetic is **shared with `CZ/dic` rather than duplicated**: `CzDicValidator`'s two
+  birth-number checks join `isValidIco()` as public static methods, which is how the eight-digit IČO
+  was already shared between the two countries.
+
+### Changed
+
+- **`SK/vat` is `entity: both`, not `legal`.** The IČ DPH is the DIČ with an `SK` prefix, and the DIČ
+  is issued to sole traders as well as companies — so `ParsedTaxId::$entityType` now reports `both`
+  for a Slovak VAT number. The old value was a factual error in the data, not a design choice.
+- `SK/vat` and `SK/rodne_cislo` overlap at ten digits. `vat` is declared first, so a value that is a
+  valid DIČ still reads as one; a birth number falls through to `rodne_cislo`. This is the same
+  documented multi-scheme behaviour Germany and the United States already rely on.
+
+### Notes
+
+- v1.1's design spec claimed Slovakia was **not** a coverage gap, on the grounds that its personal
+  and corporate identifiers share one format. They do not, and the claim is withdrawn here. The
+  spec's own caveat — that a `check_digit_failed` verdict proves the structure is accepted, not that
+  the checksum rule is the personal number's — is what turned out to matter.
+
 ## [1.1.0] - 2026-07-28
 
 Natural-person tax identifiers for eight countries that were covered only by their corporate
