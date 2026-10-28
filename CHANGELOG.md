@@ -12,6 +12,8 @@ the old behaviour was a bug. Such corrections are always called out here by name
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-28
+
 ### Added
 
 - Personal schemes `CH/ahv` (EAN-13), `MD/idnp` (weighted mod-10) and `MK/embg`
@@ -223,6 +225,8 @@ the reasoning:
 - The country is never guessed from an unprefixed value. A nine-digit number is a plausible tax ID in
   dozens of jurisdictions, so `CountryRequired` is the honest answer.
 
-[Unreleased]: https://github.com/daycry/taxid/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/daycry/taxid/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/daycry/taxid/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/daycry/taxid/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/daycry/taxid/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/daycry/taxid/releases/tag/v1.0.0

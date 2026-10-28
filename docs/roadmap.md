@@ -6,7 +6,7 @@ Current development and release history for Daycry TaxId. See [CHANGELOG.md](../
 
 ---
 
-## Current Development (Unreleased)
+## v1.3 — Shipped (2026-10-28)
 
 - **Coverage:** 94 jurisdictions, 149 schemes and 101 schemes with arithmetic checksum support.
 - **Personal identifiers:** Swiss AHV/AVS, Moldovan IDNP and Macedonian EMBG.
@@ -15,6 +15,7 @@ Current development and release history for Daycry TaxId. See [CHANGELOG.md](../
 - **Validation assurance:** `ValidationResult::checksumVerified` and the actual accepting `scheme`; US range checks no longer count as arithmetic checksums.
 - **CLI output:** Correct accepting scheme and nullable `checksum_verified` in validation JSON.
 - **Verification:** Registry/documentation integrity, regression tests, PHPStan level 8 and PSR-12 checks.
+- **PHP compatibility:** CI tests PHP 8.3, 8.4 and 8.5; coverage runs on PHP 8.4.
 
 Current behavior, sources and exceptions are documented in [countries.md](countries.md) and [algorithms.md](algorithms.md). The following sections record the earlier shipped releases.
 

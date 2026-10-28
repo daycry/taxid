@@ -11,7 +11,7 @@ formatting and taxpayer resolution — that is also usable **standalone**, outsi
 - PHP `^8.3`. CodeIgniter 4 `^4.6` is a **dev-only peer dependency** (`require-dev`), never a hard
   `require` — the core works with CI4 not installed at all. The only runtime extension required is
   `ext-simplexml` (the VIES SOAP response parser).
-- **Current development after v1.2.** 94 jurisdictions, 149 schemes, 92 national verifiers;
+- **Current release: v1.3.0.** 94 jurisdictions, 149 schemes, 92 national verifiers;
   101 schemes support arithmetic checksums. US range verifiers are excluded from that count.
   `ValidationResult::checksumVerified` reports the per-value outcome, including exceptional
   formats without a complete checksum. PHPStan level 8 (`src` + `tests`), PSR-12.
