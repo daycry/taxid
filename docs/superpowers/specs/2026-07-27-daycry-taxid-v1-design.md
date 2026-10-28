@@ -115,7 +115,12 @@ final readonly class Violation {
 
 final readonly class ValidationResult {
     /** @param Violation[] $violations */
-    public function __construct(public bool $valid, public array $violations) {}
+    public function __construct(
+        public bool $valid,
+        public array $violations,
+        public ?bool $checksumVerified = null,
+        public ?string $scheme = null,
+    ) {}
     public function isValid(): bool;
     /** @return Violation[] */
     public function violations(): array;
@@ -164,6 +169,21 @@ final readonly class LookupResult {
     public function name(): ?string;
 }
 ```
+
+2026-10 validation assurance addition (backward compatible): successful engine results
+identify the accepting `scheme` and set `checksumVerified` to true only when that value's
+complete checksum was checked. Structure/range-only results and exceptional formats
+without a verifiable complete checksum report false. Invalid results and manually
+constructed results without supplied metadata retain null. Registration remains the
+independent, nullable `LookupResult::registered` outcome.
+
+`TaxIdScheme` gains a trailing optional `bool $checksum = true` constructor parameter;
+`hasCheckDigit()` requires both a verifier class and this flag. Custom registry loaders
+can set `checksum => false` while retaining their range verifier. An optional
+`Contracts\ChecksumAwareValidatorInterface` extends the existing check-digit contract
+with `hasChecksum(string $compact): bool` for schemes with exceptional non-checksummed
+variants; existing custom validators need not implement it. The existing explicit
+`$scheme` argument continues to prevent fallback to a different identifier type.
 
 `registered === null` is load-bearing: with the default `NullProvider` nothing is ever looked up, and
 "unknown" must never be reported as "not registered".

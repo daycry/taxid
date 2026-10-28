@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Daycry\TaxId\National;
 
+use Daycry\TaxId\Contracts\ChecksumAwareValidatorInterface;
+
 /**
  * Slovakia — rodné číslo, the birth number that identifies a natural person.
  *
@@ -22,10 +24,15 @@ namespace Daycry\TaxId\National;
  * does. `vat` is declared first, so a value that is a valid DIČ is still read as
  * one.
  */
-final class SkRodneCisloValidator extends AbstractNationalValidator
+final class SkRodneCisloValidator extends AbstractNationalValidator implements ChecksumAwareValidatorInterface
 {
     protected const array COUNTRIES = ['SK'];
     protected const array SCHEMES   = ['rodne_cislo'];
+
+    public function hasChecksum(string $compact): bool
+    {
+        return strlen($compact) === 10;
+    }
 
     public function verify(string $compact): bool
     {

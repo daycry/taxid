@@ -14,10 +14,16 @@ final readonly class ValidationResult
 {
     /**
      * @param Violation[] $violations
+     * @param bool|null $checksumVerified True when the complete checksum was verified;
+     *                                   false for accepted structural-only/exceptional values;
+     *                                   null for failures or unspecified metadata.
+     * @param string|null $scheme The scheme that accepted the value, or null without a successful engine verdict.
      */
     public function __construct(
         public bool $valid,
         public array $violations,
+        public ?bool $checksumVerified = null,
+        public ?string $scheme = null,
     ) {
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Daycry\TaxId\National;
 
+use Daycry\TaxId\Contracts\ChecksumAwareValidatorInterface;
 use Daycry\TaxId\Core\Checksum\Weights;
 
 /**
@@ -23,12 +24,17 @@ use Daycry\TaxId\Core\Checksum\Weights;
  * Government departments (`GD` + 000–499) and health authorities (`HA` +
  * 500–999) have no checksum at all and are accepted on shape alone.
  */
-final class GbVatValidator extends AbstractNationalValidator
+final class GbVatValidator extends AbstractNationalValidator implements ChecksumAwareValidatorInterface
 {
     protected const array COUNTRIES = ['GB', 'XI'];
     protected const array SCHEMES   = ['vat'];
 
     private const array WEIGHTS = [8, 7, 6, 5, 4, 3, 2];
+
+    public function hasChecksum(string $compact): bool
+    {
+        return ctype_digit($compact);
+    }
 
     public function verify(string $compact): bool
     {

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Daycry\TaxId\National;
 
+use Daycry\TaxId\Contracts\ChecksumAwareValidatorInterface;
+
 /**
  * Mexico — RFC (Registro Federal de Contribuyentes): twelve characters for a
  * company, thirteen for an individual.
@@ -19,7 +21,7 @@ namespace Daycry\TaxId\National;
  * the algorithm and are accepted explicitly — they appear on a great many real
  * invoices.
  */
-final class MxRfcValidator extends AbstractNationalValidator
+final class MxRfcValidator extends AbstractNationalValidator implements ChecksumAwareValidatorInterface
 {
     protected const array COUNTRIES = ['MX'];
     protected const array SCHEMES   = ['rfc'];
@@ -28,6 +30,11 @@ final class MxRfcValidator extends AbstractNationalValidator
 
     /** SAT-published RFCs for unidentified counterparties. */
     private const array GENERIC = ['XAXX010101000', 'XEXX010101000'];
+
+    public function hasChecksum(string $compact): bool
+    {
+        return ! in_array($compact, self::GENERIC, true);
+    }
 
     public function verify(string $compact): bool
     {

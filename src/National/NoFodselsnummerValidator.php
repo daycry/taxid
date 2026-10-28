@@ -38,12 +38,15 @@ final class NoFodselsnummerValidator extends AbstractNationalValidator
 
         $day   = (int) substr($compact, 0, 2);
         $month = (int) substr($compact, 2, 2);
+        $dNumber = $day > 40;
 
-        if ($day > 40) {
+        if ($dNumber) {
             $day -= 40;   // a D-number, not an error
         }
 
-        if ($day < 1 || $day > 31 || $month < 1 || $month > 12) {
+        $year = self::calendarYear((int) substr($compact, 4, 2), (int) substr($compact, 6, 3), $dNumber);
+
+        if ($year === null || ! checkdate($month, $day, $year)) {
             return false;
         }
 
@@ -56,5 +59,27 @@ final class NoFodselsnummerValidator extends AbstractNationalValidator
         $second = Weights::mod11ComplementDigit(Weights::sum(substr($compact, 0, 10), self::WEIGHTS_SECOND));
 
         return $second !== null && $second === (int) $compact[10];
+    }
+
+    /**
+     * Skatteetaten's current allocation rules, sections 2-2-1 and 2-2-2.
+     * For pre-2000 D-numbers, 1900 is used for calendar validation; the serial
+     * alone does not distinguish older centuries. No birth date is exposed.
+     */
+    private static function calendarYear(int $year, int $serial, bool $dNumber): ?int
+    {
+        if ($dNumber) {
+            return ($serial < 500 ? 1900 : 2000) + $year;
+        }
+
+        $century = match (true) {
+            $serial <= 499 => 1900,
+            $year >= 54 && $serial <= 749 => 1800,
+            $year >= 40 && $serial >= 900 => 1900,
+            $year <= 39 => 2000,
+            default => null,
+        };
+
+        return $century === null ? null : $century + $year;
     }
 }

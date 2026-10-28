@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * `docs/countries.md` restates all 146 schemes as a table, and a hand-maintained
+ * `docs/countries.md` restates every registered scheme as a table, and a hand-maintained
  * copy of the registry is a copy that rots. Its header used to claim the file was
  * generated; no generator ever existed, and three consecutive releases each needed
  * a correction round for numbers that had drifted.

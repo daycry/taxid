@@ -74,6 +74,26 @@ final class CommandsTest extends CIUnitTestCase
         self::assertNull($payload['violation']);
     }
 
+    public function testValidateJsonReportsChecksumAssurance(): void
+    {
+        $this->runSpark(['taxid:validate', '12345678Z', '--country', 'ES', '--json']);
+
+        $payload = $this->decodeJson();
+
+        self::assertArrayHasKey('checksum_verified', $payload);
+        self::assertTrue($payload['checksum_verified']);
+    }
+
+    public function testValidateJsonReportsTheExplicitAcceptingScheme(): void
+    {
+        $this->runSpark(['taxid:validate', '12345678903', '--country', 'DE', '--scheme', 'steuernummer', '--json']);
+
+        $payload = $this->decodeJson();
+
+        self::assertSame('steuernummer', $payload['scheme']);
+        self::assertFalse($payload['checksum_verified']);
+    }
+
     public function testValidateJsonReportsTheViolation(): void
     {
         $this->runSpark(['taxid:validate', '12345678A', '--country', 'ES', '--json']);

@@ -34,6 +34,8 @@ final class ValueObjectsTest extends TestCase
         $result = new ValidationResult(true, []);
 
         self::assertTrue($result->isValid());
+        self::assertNull($result->checksumVerified);
+        self::assertNull($result->scheme);
         self::assertNull($result->firstViolation());
         self::assertNull($result->error());
         self::assertNull($result->errorCode());
