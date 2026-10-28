@@ -1,7 +1,11 @@
 # API Reference
 
+[Documentation Index](README.md) | [Package README](../README.md)
+
 Every public symbol, verified against the source. For task-oriented guidance see
 [usage.md](usage.md).
+
+---
 
 ## Contents
 
@@ -45,7 +49,7 @@ from nothing else. `$scheme` given demands that exact scheme.
 
 Passing a `ParsedTaxId` reuses its country, so the second argument is redundant there.
 
-### Parsing and formatting
+### Parsing and Formatting
 
 | Method | Returns | Notes |
 | --- | --- | --- |
@@ -62,7 +66,7 @@ Passing a `ParsedTaxId` reuses its country, so the second argument is redundant 
 
 Validates first; an invalid value never reaches the provider.
 
-### Registry introspection
+### Registry Introspection
 
 | Method | Returns |
 | --- | --- |
@@ -78,7 +82,7 @@ Validates first; an invalid value never reaches the provider.
 
 ---
 
-## Value objects
+## Value Objects
 
 All `final readonly`, in `Daycry\TaxId\DTO`.
 
@@ -95,8 +99,20 @@ public function __construct(
 ### `ValidationResult`
 
 ```php
-public function __construct(public bool $valid, public array $violations)   // Violation[]
+public function __construct(
+    public bool $valid,
+    public array $violations,                 // Violation[]
+    public ?bool $checksumVerified = null,
+    public ?string $scheme = null,
+)
 ```
+
+Successful engine results set `scheme` to the identifier type that accepted the value.
+`checksumVerified` is `true` when the complete checksum was checked, `false` when only
+structure/ranges or an exceptional variant was accepted, and `null` for invalid results
+or manually constructed results without metadata. In particular, alphabetic French/Monaco
+TVA keys report false even though the embedded SIREN is checked. This property does not
+confirm registration: that remains `LookupResult::registered`.
 
 | Method | Returns |
 | --- | --- |
@@ -239,7 +255,7 @@ public function __construct(RegistryLoaderInterface $loader = new PhpRegistryLoa
 
 Hydration is lazy and memoized: constructing a `Registry` reads nothing.
 
-### `CountryProfile` (final readonly)
+### `CountryProfile` (final Readonly)
 
 ```php
 public string $countryCode;
@@ -251,7 +267,7 @@ public array $schemes;   // array<string, TaxIdScheme>, in registry order
 `hasScheme(string): bool` · `scheme(string): TaxIdScheme` · `vatSchemes(): TaxIdScheme[]` ·
 `lengths(): int[]`
 
-### `TaxIdScheme` (final readonly)
+### `TaxIdScheme` (final Readonly)
 
 ```php
 public string $countryCode;
@@ -266,9 +282,15 @@ public ?string $checkDigitClass;     // class-string<CheckDigitValidatorInterfac
 public ?array $checkDigitOffset;     // [offset, length]; negative counts from the end
 public array $examples;              // string[] — synthetic, checksum-valid
 public ?string $notes;
+public bool $checksum;               // optional constructor argument, defaults to true
 ```
 
 `matches(string): bool` · `hasCheckDigit(): bool` · `extractCheckDigit(string): ?string`
+
+`hasCheckDigit()` requires both a verifier class and `checksum === true`. A registry
+entry may specify `checksum => false` to retain a structural/range verifier (such as
+US EIN/SSN/ITIN) without advertising an arithmetic checksum. The default preserves
+existing custom registry loaders. Per-value exceptions are reported in `ValidationResult`.
 
 ### `PhpRegistryLoader` (final)
 
@@ -322,7 +344,7 @@ public function __construct(Registry $registry = new Registry())
 | `inferCountry(string $normalized)` | `?string` |
 | `schemesMatching(CountryProfile $p, string $compact)` | `TaxIdScheme[]` |
 
-### `DetectionResult` (final readonly)
+### `DetectionResult` (final Readonly)
 
 ```php
 public ?string $countryCode;
@@ -333,7 +355,7 @@ public array $matches;   // TaxIdScheme[], registry order
 
 `countryKnown(): bool` · `hasAnyMatch(): bool` · `scheme(?string $requested = null): ?TaxIdScheme`
 
-### `AnalysisResult` (final readonly)
+### `AnalysisResult` (final Readonly)
 
 ```php
 public ValidationResult $validation;
@@ -356,7 +378,7 @@ registry data is wrong.
 
 ---
 
-## Checksum primitives
+## Checksum Primitives
 
 `Daycry\TaxId\Core\Checksum`. All static, pure and total.
 
@@ -404,6 +426,7 @@ Non-digits are skipped.
 | `ResolverInterface` | `resolve()` |
 | `RegistryLoaderInterface` | `load(): array<string, array<string, mixed>>` |
 | `CheckDigitValidatorInterface` | `supports(string $countryCode, string $scheme): bool`, `verify(string $compact): bool` |
+| `ChecksumAwareValidatorInterface` (optional; extends the check-digit contract) | `hasChecksum(string $compact): bool` — after successful verification, whether the complete checksum was available for this variant |
 | `LookupProviderInterface` | `findByTaxId(string $countryCode, string $taxId): ?EntityInfo` |
 | `ReservedValueDetectorInterface` | `isReserved(string $compact): bool` |
 | `RegistrationCheckInterface` | `isRegistered(string $countryCode, string $taxId): ?bool` |
@@ -467,7 +490,7 @@ public function __construct(
 
 ---
 
-## CodeIgniter 4 layer
+## CodeIgniter 4 Layer
 
 ### `Config\TaxId`
 

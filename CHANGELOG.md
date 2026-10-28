@@ -12,6 +12,43 @@ the old behaviour was a bug. Such corrections are always called out here by name
 
 ## [Unreleased]
 
+### Added
+
+- Personal schemes `CH/ahv` (EAN-13), `MD/idnp` (weighted mod-10) and `MK/embg`
+  (date, region and mod-11). Moldovan `MD/idno` now verifies its checksum and is
+  distinguished from personal IDNP; its entity type also covers independent entrepreneurs.
+  The registry now contains 149 schemes, with 101 supporting arithmetic checksums.
+- `MK/edb` checksum validation, corroborated against a current reference implementation
+  and government-published examples. The all-zero placeholder is rejected as reserved.
+- Checksum validation for `JP/mynumber`, `KZ/bin` (BIN/IIN) and `TW/ban`, including
+  Taiwan's 2023 mod-5 expansion. Previously accepted, incorrectly checksummed values
+  now fail validation. Kazakhstan's synthetic example is corrected to `123456789013`.
+- Optional `ValidationResult::checksumVerified` and `scheme` metadata. Accepted
+  structural/range-only and exceptional non-checksummed variants report false;
+  invalid results report null. Existing method signatures and DTO construction remain compatible.
+- Optional `ChecksumAwareValidatorInterface` for custom validators with mixed variants,
+  and a registry `checksum` flag for verifiers that only enforce structure/ranges.
+
+### Fixed
+
+- Swiss VAT metadata now includes both 15-character TVA/IVA and 16-character MWST forms.
+- Icelandic kennitala checks its century marker and complete calendar date. Norwegian
+  personal IDs use the published year/serial allocation ranges for calendar validation,
+  rejecting an impossible 1900 leap day and unallocated national-number combinations
+  while preserving 2000 leap days and the D-number day offset.
+- US EIN/SSN/ITIN are no longer advertised as checksummed; their reserved-range checks remain active.
+- `taxid:validate` reports the explicitly requested accepting scheme instead of reparsing
+  it as another identifier type. JSON output includes `checksum_verified`.
+
+### Changed
+
+- The CI test matrix now includes PHP 8.5 alongside PHP 8.3 and 8.4.
+- README and public guides follow the Daycry Auth presentation: grouped badges,
+  feature tables, step-by-step setup, a documentation index and contribution guidance.
+  Coverage, validation assurance and validator-extension instructions reflect the current registry.
+- The CI4 config fallback is expressed as an ordered lookup loop, preserving application
+  overrides while remaining compatible with the updated PHPStan CodeIgniter extension.
+
 ## [1.2.0] - 2026-07-29
 
 Slovakia's natural-person identifier, and a correction to a claim v1.1's own design spec made about

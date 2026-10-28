@@ -1,8 +1,16 @@
 # Formatting
 
-Three shapes, one tiny mask language, and one rule: formatting never fails.
+[Documentation Index](README.md) | [Package README](../README.md)
 
-## The three formats
+Format identifiers for storage, readable display or masked output.
+
+- **Compact:** Canonical uppercase form without supported separators or a stripped country prefix.
+- **Print:** The scheme's mask, when one is available.
+- **Anonymized:** All but the final two characters replaced by `*`.
+
+---
+
+## The Three Formats
 
 ```php
 use Daycry\TaxId\Enums\TaxIdFormat;
@@ -23,11 +31,12 @@ $parsed->format(TaxIdFormat::Anonymized);   // '*********35'
 **Store the compact form.** It is what `normalize()` produces, what a provider is queried with, and
 the only form two records can be reliably compared in. Render `Print` at the edge.
 
-## Anonymized, and why two characters
+---
 
-Two trailing characters are enough to correlate a value across log lines — "is this the same customer
-as the error five minutes ago?" — and not nearly enough to reconstruct it. Values of two characters
-or fewer are masked entirely, since there would be nothing left to hide.
+## Anonymized, and Why Two Characters
+
+Anonymized output retains the final two characters for correlation while masking the rest.
+Values of two characters or fewer are masked entirely.
 
 ```php
 $taxid->format('11144477735', TaxIdFormat::Anonymized, 'BR');   // '*********35'
@@ -38,7 +47,9 @@ Some identifiers are legally sensitive well beyond ordinary personal data — an
 be used as a general identifier, and Japan's My Number and Korea's resident number are similarly
 restricted. If one of those has to appear in a log at all, this is the form it should take.
 
-## The mask language
+---
+
+## The Mask Language
 
 A scheme's `mask` is a template. `#` consumes one character of the value; every other character is a
 literal copied through.
@@ -53,6 +64,7 @@ literal copied through.
 | CL RUT | `##.###.###-#` | `12.345.678-5` |
 | PL NIP | `###-###-##-##` | `123-456-32-18` |
 | CH UID | `###-###.###.###` | `CHE-116.281.839` |
+| CH AHV/AVS | `###.####.####.##` | `756.1234.5678.97` |
 
 Switzerland is the neat case: the first three `#` consume `C`, `H` and `E`, so a literal prefix needs
 no special support in the language.
@@ -60,7 +72,9 @@ no special support in the language.
 A mask is optional. Without one, `Print` returns the compact form — which is correct for the many
 schemes nobody writes with separators.
 
-## Formatting never fails
+---
+
+## Formatting Never Fails
 
 Two deliberate fallbacks:
 
@@ -76,6 +90,8 @@ should not throw because a user typed rubbish:
 $taxid->format('not-a-tax-id', TaxIdFormat::Print, 'ES');   // 'NOTATAXID'
 ```
 
+---
+
 ## Round-tripping
 
 The printed form always normalizes back to the original. The integrity test asserts it for every
@@ -87,7 +103,9 @@ $printed = $taxid->format($compact, TaxIdFormat::Print, $country);
 $taxid->normalize($printed, $country) === $compact;   // always true
 ```
 
-## The default format under CodeIgniter
+---
+
+## The Default Format Under CodeIgniter
 
 The facade's own default is `Print`. The helper defers to `Config\TaxId::$defaultFormat`
 (`'compact'`, `'print'` or `'anonymized'`) when you pass `null`:

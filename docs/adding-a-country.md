@@ -1,9 +1,16 @@
-# Adding a country
+# Adding a Country
 
-Adding a jurisdiction is a **data** edit plus, if it has a check digit, one small class. The
-integrity test is your compiler: it will not let a broken country land.
+[Documentation Index](README.md) | [Package README](../README.md)
 
-## 1. Add the country to the registry
+Extend the registry with a jurisdiction or identifier scheme, implement its supported checks, and verify the result through the public API.
+
+- **Registry:** Format, entity type, lengths, optional masks and worked examples.
+- **Validator:** Arithmetic or reserved-value checks supported by the source evidence.
+- **Verification:** Focused regression tests, registry integrity and synchronized coverage documentation.
+
+---
+
+## 1. Add the Country to the Registry
 
 `src/Registry/data/countries.php`, in alphabetical order by ISO 3166-1 alpha-2 code:
 
@@ -29,7 +36,7 @@ integrity test is your compiler: it will not let a broken country land.
 ],
 ```
 
-### Field by field
+### Field by Field
 
 **`vat_prefix`** — the prefix used when quoting the VAT number internationally, or `null`. Usually
 the country code; notable exceptions are Greece (`EL`) and Northern Ireland (`XI`). It must be unique
@@ -52,18 +59,20 @@ integrity test enforces that too.
 not paste a real company's number. They are checksum-valid, which exercises exactly the same code
 path, and nobody's identifier ends up in a public repository. See [licensing.md](licensing.md).
 
-### Scheme order matters
+### Scheme Order Matters
 
-Schemes are matched in the order you write them, and the first structural match wins when the caller
-names none. Declare the most specific first — Spain lists `nif`, then `nie`, then `cif`.
+Detection collects structural matches in registry order. Validation tries those candidates in order
+and accepts the first one that passes its configured checks. Declare the most specific first — Spain lists `nif`, then `nie`, then `cif`.
 
 If two schemes genuinely overlap (Germany's IdNr and Steuernummer both accept eleven digits), that is
 fine: the Validator tries each candidate and accepts the value if any of them does. Note the overlap
 in `notes` so the next reader isn't surprised.
 
-## 2. Write the validator, if there is a check digit
+---
 
-`src/National/<Cc><Scheme>Validator.php` — a two-letter country prefix keeps nearly eighty files
+## 2. Write the Validator, If There Is a Check Digit
+
+`src/National/<Cc><Scheme>Validator.php` — a two-letter country prefix keeps national validators
 navigable and sorts them by country:
 
 ```php
@@ -107,7 +116,7 @@ Rules the base class and the contract impose:
 - `COUNTRIES` is a list because a few algorithms serve more than one jurisdiction — the UK's VAT
   check also covers `XI`, and France's SIREN check also covers Monaco.
 
-### Reuse the primitives
+### Reuse the Primitives
 
 `src/Core/Checksum/` already has the five building blocks most algorithms need:
 
@@ -124,13 +133,13 @@ Rules the base class and the contract impose:
 Only hand-roll the arithmetic when the algorithm genuinely doesn't fit — Türkiye's VKN and Korea's
 BRN are the two bundled cases that don't.
 
-### One class per scheme when the value can't be told apart
+### One Class Per Scheme When the Value Can't Be Told Apart
 
 `verify()` receives only the compact string, not the scheme. If two of a country's schemes share a
 length, one class cannot distinguish them — split them. Sweden is the worked example: `SeOrgnrValidator`,
 `SeVatValidator` and `SePersonnummerValidator`, rather than one class guessing from the length.
 
-### Never-issued ranges
+### Never-issued Ranges
 
 If the scheme has documented values that are structurally fine but never issued, also implement
 `ReservedValueDetectorInterface`:
@@ -149,7 +158,22 @@ Those get the `ReservedValue` code rather than `CheckDigitFailed`, which is a re
 anyone debugging why their test fixture was rejected. A scheme with **no** check digit at all (the US
 identifiers) can implement only the reserved rules and have `verify()` simply confirm the shape.
 
-## 3. Run the tests
+### Per-Value Checksum Exceptions
+
+A scheme can support a checksum while accepting some variants without a complete control.
+Implement the optional `ChecksumAwareValidatorInterface` and its
+`hasChecksum(string $compact): bool` method when this applies. The engine calls it after
+successful verification to populate `ValidationResult::checksumVerified`.
+
+- **Complete checksum checked:** Return `true`.
+- **Exceptional format accepted:** Return `false`; retain the applicable structure/component checks in `verify()`.
+- **Existing custom validator:** The extra interface is optional; a normal arithmetic verifier needs no change.
+
+See `FrTvaValidator`, `GbVatValidator` and `MxRfcValidator` for existing implementations.
+
+---
+
+## 3. Run the Tests
 
 ```bash
 vendor/bin/phpunit tests/Registry
@@ -170,10 +194,14 @@ Step 8 is the one that catches the real mistake. A checksum that accepts everyth
 protection and provides none; if your validator passes steps 1–7 but fails 8, the algorithm is
 wrong, not the test.
 
-If your scheme genuinely has no arithmetic check digit, add it to `NO_ARITHMETIC_CHECK` in that test
-file — and be sure that is true rather than convenient.
+For a verifier that checks structure or reserved ranges without arithmetic, set
+`checksum => false` in its registry entry. Keep `check_digit` connected so the range
+checks still run. `hasCheckDigit()` then reports false and the mutation test uses that
+capability flag; no separate exception list is maintained. Document the limitation in `notes`.
 
-## 4. Add the behavioural tests
+---
+
+## 4. Add the Behavioural Tests
 
 The integrity test proves your examples work. Add the cases it cannot know about, in
 `tests/National/EuropeValidatorsTest.php` or `AmericasAndAsiaValidatorsTest.php`:
@@ -185,13 +213,17 @@ yield 'ZZ TIN' => ['ZZ', 'tin', ['12345678K'], ['12345678L', '1234567K']];
 Then a dedicated test for any branch — a legacy format, an exception for one issuer, a value that
 looks valid and must not be.
 
-## 5. Update the coverage docs
+---
+
+## 5. Update the Coverage Docs
 
 `docs/countries.md` restates the registry as a table, by hand. `CountriesDocIsInSyncTest` will fail
 until your row is there and every cell of it agrees with the registry, including the count line at
 the top and the order of the rows within your country — read its failure message, it names the cell.
 Then mention the addition in
 `CHANGELOG.md`.
+
+---
 
 ## Checklist
 
