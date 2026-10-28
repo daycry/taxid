@@ -1,6 +1,6 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=SYC5XDT23UZ5G&no_recurring=0&item_name=Thank+you%21&currency_code=EUR)
 
-# Daycry TaxId
+# Tax ID Validation for CodeIgniter 4 and Standalone PHP
 
 <!-- Tests & coverage -->
 [![Tests](https://github.com/daycry/taxid/actions/workflows/phpunit.yml/badge.svg)](https://github.com/daycry/taxid/actions/workflows/phpunit.yml)
