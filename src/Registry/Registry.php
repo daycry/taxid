@@ -226,6 +226,7 @@ final class Registry
             checkDigitOffset: $offset,
             examples: array_values(array_map(strval(...), $examples)),
             notes: isset($raw['notes']) ? (string) $raw['notes'] : null,
+            checksum: (bool) ($raw['checksum'] ?? true),
         );
     }
 }

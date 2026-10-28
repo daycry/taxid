@@ -1,8 +1,16 @@
 # Architecture
 
-Two layers, one direction, one test that keeps it that way.
+[Documentation Index](README.md) | [Package README](../README.md)
 
-## The problem this shape solves
+Daycry TaxId separates a framework-free validation core from optional lookup providers and CodeIgniter adapters.
+
+- **Core:** Normalize, detect, validate, parse and format identifiers.
+- **Resolver:** Validate a value, then request taxpayer information from a provider.
+- **Integration:** CodeIgniter services, helpers, commands, configuration, cache and database adapters.
+
+---
+
+## The Problem This Shape Solves
 
 A tax-ID library is mostly *data*: ninety-odd jurisdictions, each with its own format and, sometimes,
 its own arithmetic. Data of that size rots quietly — a mistyped pattern, a validator wired to the
@@ -12,7 +20,9 @@ copied into a hurry-up project with no framework at all.
 So the design has two goals: keep the validation engine dependency-free, and make bad data
 impossible to merge.
 
-## Two layers, one direction
+---
+
+## Two Layers, One Direction
 
 ```
 [ CI4 integration ]  Config\TaxId, service('taxid'), taxid_helper, spark taxid:*
@@ -31,7 +41,9 @@ Dependencies point **down only**. The Core knows nothing about the Resolver; the
 nothing about CodeIgniter. You can `new Daycry\TaxId\TaxId()` in a plain script and everything above
 the resolution layer works untouched.
 
-## The Core, step by step
+---
+
+## The Core, Step by Step
 
 **`Normalizer`** — uppercases and strips the separators humans type (`. - / \ _ ( ) [ ] : , '`). It
 does not validate and does not drop characters it doesn't recognise: an `@` survives so the Validator
@@ -48,7 +60,11 @@ can report `IllegalCharacters` rather than a baffling length error.
 
 **`Validator`** — a fixed check order, cheapest and most specific first, returning on the first
 violation. Several schemes may match one value; the value is valid if **any** of them accepts it.
-See [usage.md](usage.md#the-twelve-violation-codes) for the full ordering.
+Successful validation returns the accepting `scheme` and a nullable `checksumVerified`
+flag. A scheme-level `checksum` flag distinguishes arithmetic from range-only verifiers;
+`ChecksumAwareValidatorInterface` reports exceptions for individual values. See
+[usage.md](usage.md#knowing-what-was-checked) for assurance semantics and
+[violation codes](usage.md#the-twelve-violation-codes) for the check order.
 
 **`Parser`** — validation plus attribution. It reuses `Validator::analyze()` rather than
 re-detecting, so parsing and validating can never disagree about which scheme won.
@@ -56,11 +72,13 @@ re-detecting, so parsing and validating can never disagree about which scheme wo
 **`Formatter`** — Compact, Print (a mask where `#` consumes one character) and Anonymized.
 
 **`Core/Checksum/`** — `Luhn`, `Mod97`, `Iso7064`, `Weights` and `Verhoeff`, the five primitives
-the 85 national validators are built from. A bug in one of them is a bug in dozens of countries at
+the national validators are built from. A bug in one of them is a bug in dozens of countries at
 once, which is why they are tested directly against published reference values as well as through
 their callers.
 
-## Registry as data
+---
+
+## Registry as Data
 
 `src/Registry/data/countries.php` is a plain `return [...]` array — OPcache keeps it compiled, and
 adding a country is a data edit, not a code change. Each country has a name, an optional VAT prefix
@@ -70,7 +88,9 @@ mask, an optional validator class-string, and worked examples.
 `Registry` hydrates that lazily and memoizes it. `PhpRegistryLoader` is swappable, so an application
 can compile the same shape from a database or add a jurisdiction of its own.
 
-## Resolution, and the three-state answer
+---
+
+## Resolution, and the Three-state Answer
 
 Validation says *could this have been issued?*. Resolution asks a provider *was it?* — and only VIES
 can actually answer, for EU VAT numbers.
@@ -84,7 +104,9 @@ not implement it — a missing row is not evidence a taxpayer doesn't exist.
 The resolver validates first and never sends an invalid value to a provider: a useless round-trip and
 an avoidable disclosure of someone's data.
 
-## The dependency rule, enforced
+---
+
+## The Dependency Rule, Enforced
 
 `tests/Architecture/CoreIsFrameworkFreeTest.php` greps the guarded directories — `Contracts`, `Core`,
 `DTO`, `Enums`, `Exceptions`, `National`, `Registry`, `Resolver` — plus the individually-guarded
@@ -98,7 +120,9 @@ directory wholesale would be wrong, so those two files are named individually.
 The test also carries two self-tests — one dirty snippet that must be flagged, one clean snippet that
 must not — so an inverted or broken detector can't pass green.
 
-## Data integrity, enforced
+---
+
+## Data Integrity, Enforced
 
 `tests/Registry/CountriesDataIntegrityTest.php` is the other half. For **every scheme of every
 country** it asserts that:
@@ -116,16 +140,26 @@ country** it asserts that:
 That last one is the one that matters most: a checksum that accepts everything looks like protection
 and provides none.
 
-## Status
+---
 
-v1.0: 94 jurisdictions, 136 schemes, 88 of them with a verified check digit. 1,284 tests, PHPStan
-level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere in the suite.
+## Current Development Status
 
-v1.1: 94 jurisdictions, 145 schemes, 95 of them with a verified check digit. 1,371 tests, PHPStan
-level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere in the suite.
+| Area | Current State |
+|------|---------------|
+| Jurisdictions | 94 |
+| Identifier schemes | 149 |
+| Schemes with arithmetic checksums | 101; some variants have exceptions |
+| Structure/range-only schemes | 48 |
+| National verifiers | 92 |
+| Static analysis | PHPStan level 8 over source and tests |
+| Style | PSR-12 with the repository PHP-CS-Fixer rules |
+| Test isolation | No network requests in the test suite |
 
-v1.2: 94 jurisdictions, 146 schemes, 96 of them with a verified check digit. 1,533 tests, PHPStan
-level 8 clean over `src` and `tests`, PSR-12 clean, no network access anywhere in the suite.
+Coverage is enforced against the registry by `CountriesDocIsInSyncTest`. See the
+[coverage matrix](countries.md), [algorithm provenance](algorithms.md),
+[release history](../CHANGELOG.md) and [roadmap](roadmap.md).
+
+---
 
 ## References
 

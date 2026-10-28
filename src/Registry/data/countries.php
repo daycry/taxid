@@ -16,6 +16,7 @@ use Daycry\TaxId\National\BrCnpjValidator;
 use Daycry\TaxId\National\BrCpfValidator;
 use Daycry\TaxId\National\CaBnValidator;
 use Daycry\TaxId\National\CaSinValidator;
+use Daycry\TaxId\National\ChAhvValidator;
 use Daycry\TaxId\National\ChUidValidator;
 use Daycry\TaxId\National\ClRutValidator;
 use Daycry\TaxId\National\CnRicValidator;
@@ -49,13 +50,18 @@ use Daycry\TaxId\National\IsKennitalaValidator;
 use Daycry\TaxId\National\ItCodiceFiscaleValidator;
 use Daycry\TaxId\National\ItPartitaIvaValidator;
 use Daycry\TaxId\National\JpCorporateNumberValidator;
+use Daycry\TaxId\National\JpMyNumberValidator;
 use Daycry\TaxId\National\KrBrnValidator;
+use Daycry\TaxId\National\KzBinValidator;
 use Daycry\TaxId\National\LtAsmensKodasValidator;
 use Daycry\TaxId\National\LtPvmValidator;
 use Daycry\TaxId\National\LuMatriculeValidator;
 use Daycry\TaxId\National\LuVatValidator;
 use Daycry\TaxId\National\LvPersonalCodeValidator;
 use Daycry\TaxId\National\LvVatValidator;
+use Daycry\TaxId\National\MdIdnValidator;
+use Daycry\TaxId\National\MkEdbValidator;
+use Daycry\TaxId\National\MkEmbgValidator;
 use Daycry\TaxId\National\MtVatValidator;
 use Daycry\TaxId\National\MxRfcValidator;
 use Daycry\TaxId\National\NlBsnValidator;
@@ -82,6 +88,7 @@ use Daycry\TaxId\National\SkRodneCisloValidator;
 use Daycry\TaxId\National\SkVatValidator;
 use Daycry\TaxId\National\TrTcknValidator;
 use Daycry\TaxId\National\TrVknValidator;
+use Daycry\TaxId\National\TwBanValidator;
 use Daycry\TaxId\National\UsEinValidator;
 use Daycry\TaxId\National\UsItinValidator;
 use Daycry\TaxId\National\UsSsnValidator;
@@ -113,6 +120,7 @@ use Daycry\TaxId\National\VeRifValidator;
  *   lengths             Every legal compact length; drives the BadLength violation.
  *   mask                Print mask, '#' = one value character. Optional.
  *   check_digit         Validator class, or absent for a structural-only scheme.
+ *   checksum            False for verifiers that only check structure/ranges (defaults to true).
  *   check_digit_offset  [offset, length] of the check character(s); negative
  *                       offsets count from the end. Optional.
  *   examples            Valid values. The data-integrity test runs EVERY one of
@@ -487,9 +495,9 @@ return [
                 'entity'      => 'legal',
                 'vat'         => true,
                 'pattern'     => '/^CHE\d{9}(MWST|TVA|IVA)$/',
-                'lengths'     => [16],
+                'lengths'     => [15, 16],
                 'check_digit' => ChUidValidator::class,
-                'examples'    => ['CHE116281839MWST'],
+                'examples'    => ['CHE116281839MWST', 'CHE116281839TVA', 'CHE116281839IVA'],
                 'notes'       => 'The UID with the language-specific VAT suffix appended.',
             ],
             [
@@ -504,6 +512,19 @@ return [
                 'check_digit_offset' => [-1, 1],
                 'examples'           => ['CHE116281839'],
                 'notes'              => 'CHE is part of the number itself, not a country prefix.',
+            ],
+            [
+                'code'               => 'ahv',
+                'name'               => 'AHV/AVS — OASI personal identification number',
+                'entity'             => 'natural',
+                'vat'                => false,
+                'pattern'            => '/^756\d{10}$/',
+                'lengths'            => [13],
+                'mask'               => '###.####.####.##',
+                'check_digit'        => ChAhvValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples'           => ['7560000000019'],
+                'notes'              => 'Current 13-digit AHV/AVS/OASI number, with an EAN-13 control digit. Not a VAT number.',
             ],
         ],
     ],
@@ -1329,8 +1350,10 @@ return [
                 'vat'      => false,
                 'pattern'  => '/^\d{12}$/',
                 'lengths'  => [12],
+                'check_digit' => JpMyNumberValidator::class,
+                'check_digit_offset' => [-1, 1],
                 'examples' => ['123456789018'],
-                'notes'    => 'Use is legally restricted in Japan. Structural check only — do not store it casually.',
+                'notes'    => 'Mod-11 control digit verified. Use remains legally restricted in Japan.',
             ],
         ],
     ],
@@ -1382,8 +1405,10 @@ return [
                 'vat'      => true,
                 'pattern'  => '/^\d{12}$/',
                 'lengths'  => [12],
-                'examples' => ['123456789012'],
-                'notes'    => 'No public check-digit algorithm.',
+                'check_digit' => KzBinValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples' => ['123456789013'],
+                'notes'    => 'Shared BIN/IIN two-pass mod-11 checksum; dates and entity categories are not inferred.',
             ],
         ],
     ],
@@ -1552,12 +1577,26 @@ return [
             [
                 'code'     => 'idno',
                 'name'     => 'IDNO — state identification number',
-                'entity'   => 'legal',
+                'entity'   => 'both',
                 'vat'      => true,
-                'pattern'  => '/^\d{13}$/',
+                'pattern'  => '/^1\d{12}$/',
                 'lengths'  => [13],
-                'examples' => ['1234567890123'],
-                'notes'    => 'No public check-digit algorithm.',
+                'check_digit' => MdIdnValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples' => ['1000000000018'],
+                'notes'    => 'IDNO for organizations and registered independent entrepreneurs. Weighted mod-10 checksum; distinct from personal IDNP.',
+            ],
+            [
+                'code' => 'idnp',
+                'name' => 'IDNP — personal identification number',
+                'entity' => 'natural',
+                'vat' => false,
+                'pattern' => '/^(?:2\d{12}|09\d{11})$/',
+                'lengths' => [13],
+                'check_digit' => MdIdnValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples' => ['2000000000015', '0900000000018'],
+                'notes' => 'Personal identifier with current 2 and legacy 09 prefixes; same mod-10 checksum as IDNO.',
             ],
         ],
     ],
@@ -1584,14 +1623,28 @@ return [
         'vat_prefix' => null,
         'schemes'    => [
             [
+                'code' => 'embg',
+                'name' => 'ЕМБГ — personal identification number',
+                'entity' => 'natural',
+                'vat' => false,
+                'pattern' => '/^\d{7}(?:4[1-9]|04)\d{4}$/',
+                'lengths' => [13],
+                'check_digit' => MkEmbgValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples' => ['0101990410012', '0101990040010'],
+                'notes' => 'Personal EMBG: calendar date, region 41-49 or foreign-resident 04, and mod-11 control. Require scheme embg to prevent fallback to structural EDB.',
+            ],
+            [
                 'code'     => 'edb',
                 'name'     => 'ЕДБ — tax number',
                 'entity'   => 'both',
                 'vat'      => true,
                 'pattern'  => '/^\d{13}$/',
                 'lengths'  => [13],
+                'check_digit' => MkEdbValidator::class,
+                'check_digit_offset' => [-1, 1],
                 'examples' => ['4030000375897'],
-                'notes'    => 'No public check-digit algorithm.',
+                'notes'    => 'Weighted mod-11 checksum corroborated against government-published EDB examples. All-zero placeholder rejected. Personal EMBG has additional date and region rules; require that scheme for personal identifiers.',
             ],
         ],
     ],
@@ -2250,8 +2303,10 @@ return [
                 'vat'      => true,
                 'pattern'  => '/^\d{8}$/',
                 'lengths'  => [8],
-                'examples' => ['12345675'],
-                'notes'    => 'Checksum not implemented; only the shape is verified.',
+                'check_digit' => TwBanValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples' => ['12345675', '12345671'],
+                'notes'    => 'Uses the expanded mod-5 rule effective in 2023, including the seventh-digit-7 exception.',
             ],
         ],
     ],
@@ -2296,6 +2351,7 @@ return [
                 'lengths'     => [9],
                 'mask'        => '###-##-####',
                 'check_digit' => UsItinValidator::class,
+                'checksum'    => false,
                 'examples'    => ['970512345'],
                 'notes'       => 'Always starts with 9; the middle group must be in an IRS-allocated range.',
             ],
@@ -2308,6 +2364,7 @@ return [
                 'lengths'     => [9],
                 'mask'        => '##-#######',
                 'check_digit' => UsEinValidator::class,
+                'checksum'    => false,
                 'examples'    => ['123456789'],
                 'notes'       => 'No check digit. The US levies no VAT; sales tax IDs are issued per state.',
             ],
@@ -2320,6 +2377,7 @@ return [
                 'lengths'     => [9],
                 'mask'        => '###-##-####',
                 'check_digit' => UsSsnValidator::class,
+                'checksum'    => false,
                 'examples'    => ['123456789'],
                 'notes'       => 'Shares its shape with the EIN, so an unqualified 9-digit value is read as an EIN; '
                     . 'pass scheme "ssn" explicitly to enforce the SSN ranges.',

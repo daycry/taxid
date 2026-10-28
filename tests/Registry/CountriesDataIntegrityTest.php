@@ -31,18 +31,6 @@ use PHPUnit\Framework\TestCase;
 final class CountriesDataIntegrityTest extends TestCase
 {
     /**
-     * Schemes with no arithmetic check digit, only documented never-issued
-     * ranges. They are exempt from {@see testCheckDigitSchemesRejectMutations()}
-     * because there is nothing there to reject a mutation with.
-     *
-     * Keep this list short and justified: every entry is a country where a typo
-     * cannot be caught offline.
-     *
-     * @var string[]
-     */
-    private const array NO_ARITHMETIC_CHECK = ['US/ein', 'US/ssn', 'US/itin'];
-
-    /**
      * @return iterable<string, array{0: string, 1: TaxIdScheme}>
      */
     public static function schemeProvider(): iterable
@@ -184,7 +172,7 @@ final class CountriesDataIntegrityTest extends TestCase
     #[DataProvider('schemeProvider')]
     public function testCheckDigitSchemesRejectMutations(string $country, TaxIdScheme $scheme): void
     {
-        if ($scheme->checkDigitClass === null || in_array($country . '/' . $scheme->code, self::NO_ARITHMETIC_CHECK, true)) {
+        if (! $scheme->hasCheckDigit()) {
             $this->addToAssertionCount(1);
 
             return;

@@ -1,6 +1,27 @@
 # Roadmap
 
-## v1.0 — shipped
+[Documentation Index](README.md) | [Package README](../README.md)
+
+Current development and release history for Daycry TaxId. See [CHANGELOG.md](../CHANGELOG.md) for release notes.
+
+---
+
+## v1.3 — Shipped (2026-10-28)
+
+- **Coverage:** 94 jurisdictions, 149 schemes and 101 schemes with arithmetic checksum support.
+- **Personal identifiers:** Swiss AHV/AVS, Moldovan IDNP and Macedonian EMBG.
+- **Additional checksums:** Japanese My Number, Kazakh BIN/IIN, Taiwanese business numbers, Moldovan IDNO and Macedonian EDB.
+- **National rules:** Swiss VAT suffix lengths, Icelandic century/calendar checks and Norwegian year/serial allocation checks.
+- **Validation assurance:** `ValidationResult::checksumVerified` and the actual accepting `scheme`; US range checks no longer count as arithmetic checksums.
+- **CLI output:** Correct accepting scheme and nullable `checksum_verified` in validation JSON.
+- **Verification:** Registry/documentation integrity, regression tests, PHPStan level 8 and PSR-12 checks.
+- **PHP compatibility:** CI tests PHP 8.3, 8.4 and 8.5; coverage runs on PHP 8.4.
+
+Current behavior, sources and exceptions are documented in [countries.md](countries.md) and [algorithms.md](algorithms.md). The following sections record the earlier shipped releases.
+
+---
+
+## v1.0 — Shipped
 
 The whole of it, in one list:
 
@@ -20,7 +41,9 @@ The whole of it, in one list:
   publishable config, a migration and a model.
 - 1,284 tests, PHPStan level 8, PSR-12, no network access in the suite.
 
-## v1.1 — shipped
+---
+
+## v1.1 — Shipped
 
 Natural-person identifiers for eight countries that v1.0 covered only through their corporate
 number.
@@ -35,7 +58,9 @@ number.
   1800s is a literal plus, and it could never reach a pattern before.
 - 1,371 tests, PHPStan level 8, PSR-12, still no network access in the suite.
 
-## v1.2 — shipped
+---
+
+## v1.2 — Shipped
 
 One scheme, correcting an inconsistency inside the registry rather than adding a country.
 
@@ -47,7 +72,9 @@ One scheme, correcting an inconsistency inside the registry rather than adding a
   DIČ is issued to sole traders as well as companies.
 - 1,533 tests, PHPStan level 8, PSR-12, still no network access in the suite.
 
-## Deliberately out of scope
+---
+
+## Deliberately Out of Scope
 
 These are not "not yet". They are decisions.
 
@@ -74,7 +101,9 @@ translation layer does the work. See [i18n.md](i18n.md).
 **A `TaxIdType` enum.** Scheme codes are registry strings on purpose: as an enum, adding a country
 would be a BC-relevant change to a public type. `Registry::scheme()` is the typed lookup.
 
-## Possible later
+---
+
+## Possible Later
 
 Ideas, not commitments. Each would need a real use case behind it before it earns its complexity.
 
@@ -82,14 +111,16 @@ Ideas, not commitments. Each would need a real use case behind it before it earn
   ([adding-a-country.md](adding-a-country.md)). Contributions welcome, especially from someone who
   can verify their own country's algorithm.
 - **Check digits for the currently structural-only schemes**, where an authority publishes the
-  algorithm or a contributor can cite it confidently. `ZA`, `UA`, `GT`, `SG` and `TW` are the
-  nearest misses.
+  algorithm or a contributor can cite it confidently. `ZA`, `UA`, `GT` and `SG` remain
+  candidates for further source verification; Taiwan's business-number checksum is implemented.
 - **A CI4 validation rule** (`taxid[ES]`) so `$this->validate()` can use it directly. Small, useful,
   and purely in the adapter layer.
 - **Batch resolution** — an interface for providers that can answer many IDs in one call, which some
   commercial services offer and VIES does not.
 - **A VIES REST transport** alongside the SOAP one, if and when the Commission's REST interface
   stabilizes. `Config\TaxId::$viesEndpoint` already makes the endpoint swappable.
+
+---
 
 ## Versioning
 

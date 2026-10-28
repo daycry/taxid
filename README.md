@@ -1,231 +1,291 @@
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=SYC5XDT23UZ5G&no_recurring=0&item_name=Thank+you%21&currency_code=EUR)
+
 # Daycry TaxId
 
+<!-- Tests & coverage -->
 [![Tests](https://github.com/daycry/taxid/actions/workflows/phpunit.yml/badge.svg)](https://github.com/daycry/taxid/actions/workflows/phpunit.yml)
+[![Coverage Status](https://coveralls.io/repos/github/daycry/taxid/badge.svg)](https://coveralls.io/github/daycry/taxid)
+
+<!-- Static analysis & quality gates -->
 [![PHPStan](https://github.com/daycry/taxid/actions/workflows/phpstan.yml/badge.svg)](https://github.com/daycry/taxid/actions/workflows/phpstan.yml)
 [![Code Style](https://github.com/daycry/taxid/actions/workflows/code-style.yml/badge.svg)](https://github.com/daycry/taxid/actions/workflows/code-style.yml)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CodeQL](https://github.com/daycry/taxid/actions/workflows/codeql.yml/badge.svg)](https://github.com/daycry/taxid/actions/workflows/codeql.yml)
 
-Validate, parse and format tax identification numbers for **94 jurisdictions** — NIF, CIF, VAT,
-CPF, CNPJ, RFC, EIN, GSTIN and 137 other schemes — with real check-digit verification, not just a
-regex.
+<!-- Package -->
+[![Latest Stable Version](https://poser.pugx.org/daycry/taxid/v/stable)](https://packagist.org/packages/daycry/taxid)
+[![Latest Unstable Version](https://poser.pugx.org/daycry/taxid/v/unstable)](https://packagist.org/packages/daycry/taxid)
+[![Total Downloads](https://poser.pugx.org/daycry/taxid/downloads)](https://packagist.org/packages/daycry/taxid)
+[![Monthly Downloads](https://poser.pugx.org/daycry/taxid/d/monthly)](https://packagist.org/packages/daycry/taxid)
+[![License](https://poser.pugx.org/daycry/taxid/license)](LICENSE)
 
-Built for CodeIgniter 4, and equally usable standalone with zero dependencies.
+<!-- Tooling -->
+[![PHP Version Require](https://poser.pugx.org/daycry/taxid/require/php)](https://packagist.org/packages/daycry/taxid)
+[![PHPStan level 8](https://img.shields.io/badge/PHPStan-level%208-2563eb.svg)](phpstan.neon)
+
+<!-- Community -->
+[![GitHub stars](https://img.shields.io/github/stars/daycry/taxid)](https://github.com/daycry/taxid/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/daycry/taxid)](https://github.com/daycry/taxid/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/daycry/taxid)](https://github.com/daycry/taxid/issues)
+
+A tax identification number library for **CodeIgniter 4**, with a framework-free core for standalone PHP applications.
+
+Validate, parse and format identifiers across **94 jurisdictions and 149 schemes**, including NIF, CIF, VAT, CPF, CNPJ, RFC, AHV/AVS, IDNO, IDNP, EMBG and EDB. **101 schemes support arithmetic checksums**; each validation result reports what was actually checked.
 
 ```bash
 composer require daycry/taxid
 ```
 
-```php
-$taxid = new \Daycry\TaxId\TaxId();
-
-$taxid->isValid('12345678Z', 'ES');        // true  — NIF, mod-23 letter checked
-$taxid->isValid('ESB12345674');            // true  — country inferred from the VAT prefix
-$taxid->isValid('111.444.777-35', 'BR');   // true  — separators are irrelevant
-$taxid->isValid('12345678A', 'ES');        // false — wrong check letter
-
-$taxid->parse('11.222.333/0001-81', 'BR')->scheme;   // 'cnpj'
-```
-
-## Why not just a regex?
-
-Because there is no universal tax-ID algorithm. Every jurisdiction defines its own length, character
-set, structure and — where one exists at all — its own check digit. A single `isValidTaxId()` regex
-accepts a mistyped number as readily as a real one.
-
-This package instead ships a **registry of per-country rules** plus **one validator per algorithm**,
-and a data-integrity test that runs every bundled example through the public API so a country cannot
-land broken.
-
-What "valid" means here is *could this have been issued?* — structure plus check digit. It never
-means *was it issued?*. For that, EU VAT numbers can be checked against VIES; see
-[Resolving a taxpayer](#resolving-a-taxpayer-optional).
-
-## Quickstart
-
-### Facade (framework-free, works standalone)
-
-```php
-use Daycry\TaxId\TaxId;
-use Daycry\TaxId\Enums\TaxIdFormat;
-
-$taxid = new TaxId();
-
-// Validate. Never throws, whatever you feed it.
-$result = $taxid->validate('12345678A', 'ES');
-$result->isValid();     // false
-$result->errorCode();   // 'check_digit_failed'
-$result->error();       // 'The tax ID check digit is invalid.'
-
-// Parse: which country, which scheme, who it identifies.
-$parsed = $taxid->parse('111.444.777-35', 'BR');
-$parsed->scheme;                            // 'cpf'
-$parsed->schemeName;                        // 'CPF — Cadastro de Pessoas Físicas'
-$parsed->entityType;                        // EntityType::Natural
-$parsed->compact;                           // '11144477735'
-$parsed->format();                          // '111.444.777-35'
-$parsed->format(TaxIdFormat::Anonymized);   // '*********35'
-
-// VAT numbers, quotable internationally.
-$taxid->parse('B12345674', 'ES')->vatNumber();   // 'ESB12345674'
-$taxid->parse('094259216', 'GR')->vatNumber();   // 'EL094259216' — Greece quotes EL, not GR
-
-// Ask for one specific scheme.
-$taxid->isValid('12345678Z', 'ES', 'cif');   // false — it is a valid NIF, not a CIF
-```
-
-### CI4 service
-
-```php
-$taxid = service('taxid');   // auto-discovered, no wiring needed
-
-$taxid->isValid($request->getPost('vat_number'));
-```
-
-### CI4 helper
-
-```php
-helper('taxid');
-
-taxid_is_valid('12345678Z', 'ES');         // true
-taxid_format('11144477735', null, 'BR');   // '111.444.777-35'
-vat_number('B12345674', 'ES');             // 'ESB12345674'
-
-// Set Config\TaxId::$defaultCountry = 'ES' and stop repeating yourself:
-taxid_is_valid('12345678Z');               // true
-```
-
-### spark commands
-
-```bash
-php spark taxid:validate 12345678Z --country ES     # exit 0 valid, 1 invalid
-php spark taxid:validate ESB12345674 --json
-php spark taxid:parse 11.222.333/0001-81 --country BR
-php spark taxid:lookup ESB12345674                  # exit 2 = valid but NOT registered
-php spark taxid:countries                           # the whole registry
-php spark taxid:countries ES                        # one country's schemes
-php spark taxid:publish                             # publish the config into your app
-```
-
-## Coverage
-
-**94 countries, 146 schemes.** 96 of them verify a real check digit; the rest validate
-structure only, because the jurisdiction publishes no verifier algorithm — and each of those says so
-in its registry `notes`.
-
-| Region | Highlights |
-| --- | --- |
-| EU-27 | Every member state's VAT number, check digit verified. Plus national IDs where they are the tax identifier: ES NIF/NIE/CIF, PT NIF, IT codice fiscale & partita IVA, NL BSN, PL NIP/PESEL/REGON, RO CNP, BG EGN, HR OIB, EE isikukood, LV personas kods, BE rijksregisternummer, SE personnummer, CZ/SK IČO. |
-| Rest of Europe | GB (VAT, UTR, NINO), XI Northern Ireland, CH UID/MWST, NO organisasjonsnummer/MVA, IS kennitala, RS PIB, RU INN, TR VKN/TCKN, MC, AL, BA, BY, GE, MD, ME, MK, UA, AM, AZ, KZ, LI. |
-| Americas | BR CPF/CNPJ, MX RFC, AR CUIT, CL RUT, CO NIT, PE RUC, UY RUT, VE RIF, EC RUC/cédula, DO RNC, PY RUC, US EIN/SSN/ITIN, CA BN/SIN, plus BO, CR, GT, HN, NI, PA, SV. |
-| Asia-Pacific | IN GSTIN/PAN, CN USCC & resident ID, JP corporate number, KR BRN, AU ABN/ACN/TFN, NZ IRD, plus HK, ID, MY, PH, PK, SG, TH, TW, VN. |
-| Middle East & Africa | IL, SA, AE, EG, ZA, KE, MA, NG, DZ, TN. |
-
-`php spark taxid:countries` prints the current list; [docs/countries.md](docs/countries.md) has the
-full matrix with lengths, entity types and which schemes are checksummed.
+---
 
 ## Features
 
-- ✅ **Real check digits** — mod-11, mod-97, Luhn, Verhoeff, ISO/IEC 7064 (MOD 11,10 / 11-2 /
-  37,36), and 85 national variants, each in its own small, tested class.
-- ✅ **Country inference** from a VAT prefix (`ESB12345674`, `DE136695976`, `EL094259216`) — and
-  never from bare digits, because that would be a confident guess with no basis.
-- ✅ **Precise violations** — twelve `ViolationCode` cases tell "wrong length" from "wrong shape"
-  from "wrong scheme" from "bad check digit" from "never-issued range".
-- ✅ **Formatting** — Compact, Print (each country's conventional mask) and Anonymized (`*********35`)
-  so a tax ID can be logged without leaking it.
-- ✅ **Multi-scheme countries** handled honestly: a value valid under *any* of a country's schemes is
-  valid, and you can demand one specific reading.
-- ✅ **Optional VIES lookup** for EU VAT numbers, with a three-state answer that never confuses
-  "the service was down" with "not registered".
-- ✅ **Framework-free core** — enforced by a test, not a promise.
-- ✅ PHPStan level 8, PSR-12, 1,533 tests.
+### Validation
 
-## Resolving a taxpayer (optional)
+| Feature | Description |
+|---------|-------------|
+| **Country Registry** | 94 jurisdictions and 149 identifier schemes, with entity types, formats and examples |
+| **Checksum Verification** | 101 schemes with national algorithms, including mod-11, mod-97, Luhn, Verhoeff, EAN-13 and ISO 7064 |
+| **Validation Assurance** | `checksumVerified` distinguishes a checked checksum from accepted structure/ranges |
+| **Explicit Scheme Selection** | Require a specific type such as `nif`, `ahv`, `idnp`, `embg` or `edb` |
+| **Country Inference** | Detect recognized country/VAT prefixes, including Greece's `EL` and Northern Ireland's `XI` |
+| **Detailed Errors** | Twelve violation codes for input, country, structure, scheme, reserved values and checksum failures |
+| **National Rules** | Personal/company variants, reserved ranges and supported calendar/century checks |
 
-Validation is offline and always available. *Resolution* asks a provider whether the taxpayer really
-exists — and is entirely opt-in.
+### Parsing & Formatting
+
+| Feature | Description |
+|---------|-------------|
+| **Normalization** | Uppercase and remove supported separators before checking a value |
+| **Structured Results** | Country, accepting scheme, entity type, compact value and available check characters |
+| **Print Formatting** | Country-specific masks, including Swiss AHV/AVS `756.1234.5678.97` |
+| **Anonymized Formatting** | Mask all but the final two characters for display or logging |
+| **VAT Representation** | Return the international VAT form when the scheme and country define one |
+
+### Integration & Resolution
+
+| Feature | Description |
+|---------|-------------|
+| **CodeIgniter Service** | Auto-discovered `service('taxid')` and a publishable configuration |
+| **Helper Functions** | Validation, parsing, formatting and taxpayer lookup helpers |
+| **CLI Commands** | Validate, parse, resolve and inspect country coverage, with JSON output |
+| **Standalone Core** | Validation, parsing and formatting without CodeIgniter or runtime Composer packages |
+| **Optional VIES Lookup** | EU VAT registration checks for the EU-27 and Northern Ireland |
+| **Provider Chain & Cache** | Combine local database records, VIES and custom providers with optional caching |
+| **Extension Points** | Custom registry loaders, national validators and lookup providers |
+
+**Validity and registration are separate outcomes.** A successful validation confirms that the value passes the implemented rules. It does not confirm that a taxpayer exists. Some schemes check structure/ranges only, and some checksum schemes have exceptional formats. See [Validation Assurance](docs/usage.md#knowing-what-was-checked) and [Algorithm Sources & Limits](docs/algorithms.md).
+
+---
+
+## Quick Start
+
+### Requirements
+
+- PHP **8.3** or higher; CI tests PHP **8.3**, **8.4** and **8.5**.
+- Composer and the **SimpleXML** PHP extension, declared by the package for VIES response parsing.
+- CodeIgniter **4.6** or higher when using the service, helpers, commands or framework providers.
+
+### 1. Install via Composer
+
+```bash
+composer require daycry/taxid
+```
+
+### 2. Validate a Tax ID
 
 ```php
-// app/Config/TaxId.php (php spark taxid:publish)
-public string $provider = 'chain';   // local table first, then VIES
-public ?int $cacheTtl   = 86400;     // VIES is slow and rate-limited: cache it
+use Daycry\TaxId\TaxId;
+
+$taxid = new TaxId();
+
+$result = $taxid->validate('12345678Z', 'ES', 'nif');
+
+$result->isValid();          // true
+$result->checksumVerified;   // true
+$result->scheme;             // 'nif'
+
+$invalid = $taxid->validate('12345678A', 'ES', 'nif');
+$invalid->errorCode();        // 'check_digit_failed'
+
+$taxid->isValid('ESB12345674');                   // true: country inferred
+$taxid->isValid('756.1234.5678.97', 'CH', 'ahv'); // true: Swiss personal identifier
+$taxid->isValid('1000000000018', 'MD', 'idno');   // true: Moldovan organization ID
+$taxid->isValid('2000000000015', 'MD', 'idnp');   // true: Moldovan personal ID
+$taxid->isValid('0101990410012', 'MK', 'embg');   // true: Macedonian personal ID
+$taxid->isValid('4000000000013', 'MK', 'edb');    // true: Macedonian tax registration
+```
+
+Always pass the third argument when a field requires one identifier type. Without it, any matching scheme for the country may accept the value.
+
+### 3. Parse & Format
+
+```php
+use Daycry\TaxId\Enums\TaxIdFormat;
+
+$parsed = $taxid->parse('111.444.777-35', 'BR');
+
+$parsed->countryCode;                         // 'BR'
+$parsed->scheme;                              // 'cpf'
+$parsed->compact;                             // '11144477735'
+$parsed->format();                            // '111.444.777-35'
+$parsed->format(TaxIdFormat::Anonymized);       // '*********35'
+
+$taxid->parse('B12345674', 'ES')->vatNumber(); // 'ESB12345674'
+```
+
+`parse()` throws `InvalidTaxIdException` for an invalid value. Use `tryParse()` for a nullable result. `validate()` returns the violations without throwing for invalid string input.
+
+### 4. Use the CodeIgniter Service or Helper
+
+```php
+$taxid = service('taxid');
+$taxid->isValid('756.1234.5678.97', 'CH', 'ahv'); // true
+
+helper('taxid');
+
+taxid_is_valid('12345678Z', 'ES', 'nif');       // true
+taxid_format('11144477735', null, 'BR');        // '111.444.777-35'
+vat_number('B12345674', 'ES');                 // 'ESB12345674'
+```
+
+Validation works immediately. To customize the CI4 configuration:
+
+```bash
+php spark taxid:publish
+```
+
+Set `Config\TaxId::$defaultCountry` when the helper and CLI should assume a country. The standalone facade continues to use its explicit country or a recognized input prefix.
+
+### CLI Commands
+
+```bash
+php spark taxid:validate 12345678Z --country ES --scheme nif
+php spark taxid:validate 756.1234.5678.97 --country CH --scheme ahv --json
+php spark taxid:parse 11.222.333/0001-81 --country BR
+php spark taxid:countries
+php spark taxid:countries MK --json
+```
+
+`taxid:validate` exits **0** for a valid value and **1** for an invalid one. JSON output includes the accepting `scheme` and nullable `checksum_verified` field.
+
+---
+
+## Country Coverage
+
+| Region | Examples |
+|--------|----------|
+| **European Union** | ES NIF/NIE/CIF, PT NIF, IT codice fiscale/partita IVA, FR SIREN/SIRET/TVA, DE VAT/IdNr, PL NIP/PESEL/REGON |
+| **Other European Jurisdictions** | CH UID/IVA/AHV, NO organization/personal IDs, IS kennitala/VSK, MD IDNO/IDNP, MK EMBG/EDB, GB VAT/UTR/NINO, XI VAT |
+| **Americas** | BR CPF/CNPJ, MX RFC, AR CUIT, CL RUT, CO NIT, PE RUC, US EIN/SSN/ITIN, CA BN/SIN |
+| **Asia-Pacific** | IN GSTIN/PAN, CN USCC/resident ID, JP corporate number/My Number, KR BRN, AU ABN/ACN/TFN, NZ IRD, TW business number |
+| **Middle East & Africa** | IL personal/company IDs and registered formats for SA, AE, EG, ZA, KE, MA, NG, DZ and TN |
+
+The table lists coverage, not an identical validation level for every identifier. [Country Coverage](docs/countries.md) contains every scheme, its supported lengths and checksum capability. [Algorithm Sources & Limits](docs/algorithms.md) explains the arithmetic, exceptional formats and structural-only entries.
+
+---
+
+## Taxpayer Resolution (Optional)
+
+Configure a provider when the application needs registration or taxpayer data:
+
+```php
+// app/Config/TaxId.php, after php spark taxid:publish
+namespace Config;
+
+use Daycry\TaxId\Config\TaxId as BaseTaxId;
+
+class TaxId extends BaseTaxId
+{
+    public string $provider = 'vies';
+    public ?int $cacheTtl = 86400;
+}
 ```
 
 ```php
 $result = service('taxid')->resolve('ESB12345674');
 
-$result->isValid();        // true  — offline validity
+$result->isValid();        // offline validation result
 $result->isRegistered();   // true | false | null
-$result->name();           // 'ACME SL', or null if undisclosed
+$result->name();           // registered name, when available
 ```
 
-**`isRegistered()` returns three states, and the third one matters.** `null` means *nobody could
-answer*: no provider configured, the country is outside VIES, or the service was unreachable.
-Treating it as `false` would block real customers whenever someone else's server has a bad day.
+| Registration Result | Meaning |
+|---------------------|---------|
+| **`true`** | The configured provider found the taxpayer or confirmed registration |
+| **`false`** | A registration-checking provider explicitly reported no registration |
+| **`null`** | No answer: provider not configured, unsupported country, unavailable service or inconclusive lookup |
 
-Providers: `NullProvider` (default, inert), `ViesProvider` (EU VAT), `DatabaseProvider` (your own
-`tax_entities` table), `CachedProvider`, `ChainProvider`. See [docs/usage.md](docs/usage.md).
-
-## Database setup (optional)
-
-Only needed for `DatabaseProvider` or `ChainProvider`.
+For a local database or the database-first `chain` provider, run the optional migration:
 
 ```bash
 php spark migrate --all
 ```
 
-That creates an **empty** `tax_entities` table. This package ships no taxpayer data — what goes in it
-is yours to decide: cached VIES answers, a customer master, or a register you are licensed to hold.
+The `tax_entities` table starts empty. No taxpayer dataset is bundled. See [Providers & Configuration](docs/usage.md#providers) before enabling external lookups.
 
-## Standalone usage (outside CodeIgniter 4)
+---
 
-The core has no framework dependency at all:
+## Standalone Usage
 
 ```php
 require 'vendor/autoload.php';
 
 $taxid = new \Daycry\TaxId\TaxId();
-$taxid->isValid('11144477735', 'BR');   // true
+$taxid->isValid('756.1234.5678.97', 'CH', 'ahv'); // true
 ```
 
-Only `Config\`, `Commands\`, `Models\`, `Database\`, `Helpers\` and three of the five providers touch
-CodeIgniter, and `tests/Architecture/CoreIsFrameworkFreeTest.php` fails the build if that ever stops
-being true.
+The core has no CodeIgniter dependency. The service, helper, commands, database integration, VIES client and CI4 cache adapter use CodeIgniter.
 
-## Compatibility
-
-| | |
-| --- | --- |
-| PHP | 8.3, 8.4 |
-| CodeIgniter | 4.6+ (optional — dev dependency only) |
-| Extensions | `ext-simplexml` (VIES response parsing) |
+---
 
 ## Documentation
 
-| Document | What's in it |
-| --- | --- |
-| [docs/usage.md](docs/usage.md) | Task-oriented guide: facade, helper, commands, providers, config |
-| [docs/api-reference.md](docs/api-reference.md) | Complete per-symbol reference |
-| [docs/countries.md](docs/countries.md) | Coverage matrix: every country and scheme |
-| [docs/adding-a-country.md](docs/adding-a-country.md) | How to extend the registry |
-| [docs/algorithms.md](docs/algorithms.md) | Per-algorithm provenance, and why some have no checksum |
-| [docs/architecture.md](docs/architecture.md) | The two layers and the rule between them |
-| [docs/formatting.md](docs/formatting.md) | Format reference and the print-mask language |
-| [docs/i18n.md](docs/i18n.md) | Translating violation messages |
-| [docs/licensing.md](docs/licensing.md) | Data authoring and privacy |
-| [docs/roadmap.md](docs/roadmap.md) | What v1.0 and v1.1 cover, and what it deliberately doesn't |
+Start with the **[Documentation Index](docs/README.md)** for guides and feature summaries.
+
+| Section | Description |
+|---------|-------------|
+| [Usage Guide](docs/usage.md) | Facade, validation assurance, helpers, CLI, providers and configuration |
+| [API Reference](docs/api-reference.md) | Public methods, DTOs, contracts and extension points |
+| [Country Coverage](docs/countries.md) | All 94 jurisdictions and 149 identifier schemes |
+| [Algorithm Sources & Limits](docs/algorithms.md) | Checksums, exceptional variants and verification provenance |
+| [Formatting](docs/formatting.md) | Compact, print and anonymized output, with mask examples |
+| [Adding a Country](docs/adding-a-country.md) | Registry entries, validators and required checks |
+| [Architecture](docs/architecture.md) | Dependency boundaries, validation pipeline and integrity checks |
+| [Translation](docs/i18n.md) | Violation codes and application-level translation |
+| [Data & Licensing](docs/licensing.md) | Registry authoring, example data and external lookups |
+| [Roadmap](docs/roadmap.md) | Current development, release history and future work |
+
+---
 
 ## Development
 
 ```bash
-composer update    # not `install` — this library ships no composer.lock
-composer test      # PHPUnit
-composer analyze   # PHPStan level 8
-composer cs        # PHP-CS-Fixer (dry run); `vendor/bin/php-cs-fixer fix` to apply
+composer update
+composer test
+composer analyze
+composer cs
 ```
 
-No test touches the network.
+- **Tests:** PHPUnit; test cases do not make network requests.
+- **Static Analysis:** PHPStan level 8 over `src/` and `tests/`.
+- **Code Style:** PSR-12 with PHP-CS-Fixer; `composer cs` checks without editing.
+- **Architecture:** Tests enforce the framework-free core and registry/documentation consistency.
+- **Dependencies:** `composer.lock` is intentionally ignored for this library; CI resolves `composer.json` with `composer update`.
+
+---
+
+## Contributing
+
+Code, documentation, country rules and bug reports are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and [Adding a Country](docs/adding-a-country.md) for validation-specific requirements.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## Acknowledgements
+
+<a href="https://github.com/daycry/taxid/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=daycry/taxid" alt="Daycry TaxId contributors" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).

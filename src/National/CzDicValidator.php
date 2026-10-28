@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Daycry\TaxId\National;
 
+use Daycry\TaxId\Contracts\ChecksumAwareValidatorInterface;
 use Daycry\TaxId\Core\Checksum\Weights;
 
 /**
@@ -20,12 +21,17 @@ use Daycry\TaxId\Core\Checksum\Weights;
  *   11, with a documented exception for 1954–1985 births where a remainder of
  *   10 was written as a check digit of `0`.
  */
-final class CzDicValidator extends AbstractNationalValidator
+final class CzDicValidator extends AbstractNationalValidator implements ChecksumAwareValidatorInterface
 {
     protected const array COUNTRIES = ['CZ'];
     protected const array SCHEMES   = ['dic', 'ico'];
 
     private const array ICO_WEIGHTS = [8, 7, 6, 5, 4, 3, 2];
+
+    public function hasChecksum(string $compact): bool
+    {
+        return strlen($compact) !== 9;
+    }
 
     public function verify(string $compact): bool
     {

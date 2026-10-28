@@ -49,12 +49,16 @@ final class ValidateCommand extends BaseCommand
         $result    = $svc->validate($taxId, $country, $scheme);
         $violation = $result->firstViolation();
         $parsed    = $result->isValid() ? $svc->tryParse($taxId, $country) : null;
+        $acceptedScheme = $parsed !== null && $result->scheme !== null
+            ? $svc->scheme($parsed->countryCode, $result->scheme)
+            : null;
 
         if (CLI::getOption('json')) {
             CommandSupport::writeJson([
                 'valid'     => $result->isValid(),
                 'country'   => $parsed?->countryCode,
-                'scheme'    => $parsed?->scheme,
+                'scheme'    => $result->scheme,
+                'checksum_verified' => $result->checksumVerified,
                 'compact'   => $parsed?->compact,
                 'violation' => $violation === null ? null : [
                     'code'    => $violation->code->value,
@@ -67,7 +71,7 @@ final class ValidateCommand extends BaseCommand
 
         if ($result->isValid()) {
             CLI::write('VALID', 'green');
-            CLI::write(sprintf('  %s / %s (%s)', $parsed?->countryCode, $parsed?->scheme, $parsed?->schemeName));
+            CLI::write(sprintf('  %s / %s (%s)', $parsed?->countryCode, $result->scheme, $acceptedScheme?->name));
         } else {
             CLI::write('INVALID: ' . $violation?->code->value . ' - ' . $violation?->message, 'red');
         }

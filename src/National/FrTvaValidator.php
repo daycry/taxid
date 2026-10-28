@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Daycry\TaxId\National;
 
+use Daycry\TaxId\Contracts\ChecksumAwareValidatorInterface;
 use Daycry\TaxId\Core\Checksum\Luhn;
 
 /**
@@ -19,10 +20,15 @@ use Daycry\TaxId\Core\Checksum\Luhn;
  * a deliberate, documented limitation rather than an oversight: inventing a
  * rule would reject valid numbers.
  */
-final class FrTvaValidator extends AbstractNationalValidator
+final class FrTvaValidator extends AbstractNationalValidator implements ChecksumAwareValidatorInterface
 {
     protected const array COUNTRIES = ['FR', 'MC'];
     protected const array SCHEMES   = ['tva'];
+
+    public function hasChecksum(string $compact): bool
+    {
+        return ctype_digit(substr($compact, 0, 2));
+    }
 
     public function verify(string $compact): bool
     {

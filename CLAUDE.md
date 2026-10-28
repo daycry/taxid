@@ -11,10 +11,11 @@ formatting and taxpayer resolution — that is also usable **standalone**, outsi
 - PHP `^8.3`. CodeIgniter 4 `^4.6` is a **dev-only peer dependency** (`require-dev`), never a hard
   `require` — the core works with CI4 not installed at all. The only runtime extension required is
   `ext-simplexml` (the VIES SOAP response parser).
-- **Current status: v1.2.** 94 jurisdictions, 146 schemes, 85 national check-digit validators
-  covering 96 of those schemes. 1,533 tests / 5,233 assertions green, PHPStan level 8 clean (`src` +
-  `tests`, with the `codeigniter/phpstan-codeigniter` extension), PSR-12 clean. Trust
-  `composer test`'s output over the numbers written here.
+- **Current release: v1.3.0.** 94 jurisdictions, 149 schemes, 92 national verifiers;
+  101 schemes support arithmetic checksums. US range verifiers are excluded from that count.
+  `ValidationResult::checksumVerified` reports the per-value outcome, including exceptional
+  formats without a complete checksum. PHPStan level 8 (`src` + `tests`), PSR-12.
+  Trust `composer test`'s output for test and assertion counts.
 - Sibling package this one deliberately mirrors: [`daycry/iban`](https://github.com/daycry/iban-calculator)
   — same two-layer architecture, same tooling, same doc set, same enforcement test.
 
@@ -45,9 +46,10 @@ When you add or change a country, you are editing *data*, and the integrity test
 ```
 
 **Framework-free — must never import `codeigniter4/*` or reference `CodeIgniter\`:**
-- `src/Contracts` — 7 interfaces: `ValidatorInterface`, `ParserInterface`, `ResolverInterface`,
-  `RegistryLoaderInterface`, `CheckDigitValidatorInterface`, `LookupProviderInterface`, plus the two
-  optional/additive ones, `ReservedValueDetectorInterface` and `RegistrationCheckInterface`.
+- `src/Contracts` — 9 interfaces: `ValidatorInterface`, `ParserInterface`, `ResolverInterface`,
+  `RegistryLoaderInterface`, `CheckDigitValidatorInterface`, `LookupProviderInterface`, plus the
+  optional/additive `ReservedValueDetectorInterface`, `RegistrationCheckInterface` and
+  `ChecksumAwareValidatorInterface`.
 - `src/Core` — `Normalizer`, `SchemeDetector`, `DetectionResult`, `Validator`, `AnalysisResult`,
   `Parser`, `Formatter`, `CheckDigitValidatorFactory`, and `Core/Checksum/` (`Luhn`, `Mod97`,
   `Iso7064`, `Weights`, `Verhoeff`).
@@ -59,7 +61,7 @@ When you add or change a country, you are editing *data*, and the integrity test
   (`final`, carries the `ValidationResult` via `result()`).
 - `src/Registry` — `Registry`, `PhpRegistryLoader`, `CountryProfile`, `TaxIdScheme` +
   `data/countries.php`.
-- `src/National` — 84 check-digit validators, all extending `AbstractNationalValidator`.
+- `src/National` — 92 national verifiers, all extending `AbstractNationalValidator`.
 - `src/Resolver` — `Resolver`.
 
 **Framework-free but living in an un-guarded directory** (guarded individually by the architecture
@@ -85,8 +87,9 @@ composer analyze   # PHPStan, level 8, paths: src + tests (phpstan.neon)
 composer cs        # PHP-CS-Fixer, PSR-12 + strict_types, dry-run (add `fix` locally to apply)
 ```
 
-CI runs these same three scripts across a PHP 8.3/8.4 matrix (`.github/workflows/phpunit.yml`,
-`phpstan.yml`, `code-style.yml`), plus a CodeQL scan of the workflow files themselves
+CI runs tests across PHP 8.3/8.4/8.5 (`.github/workflows/phpunit.yml`), with coverage on PHP 8.4.
+Static analysis and code style run on the minimum supported PHP 8.3 (`phpstan.yml`,
+`code-style.yml`), plus a CodeQL scan of the workflow files themselves
 (`codeql.yml`, `language: actions` — PHP has no native CodeQL analyzer).
 
 **No test touches the network.** `ViesProvider` is tested against canned SOAP envelopes through
@@ -105,7 +108,7 @@ platform resolution despite the missing lock file.
 
 ```
 src/
-  Contracts/    7 interfaces (framework-free), 2 of them optional/additive
+  Contracts/    9 interfaces (framework-free), 3 of them optional/additive
   Core/         Normalizer, SchemeDetector, DetectionResult, Validator, AnalysisResult, Parser,
                  Formatter, CheckDigitValidatorFactory; Checksum/ (Luhn, Mod97, Iso7064, Weights,
                  Verhoeff)
@@ -113,7 +116,7 @@ src/
   Enums/        ViolationCode (12 cases), EntityType, TaxIdFormat
   Exceptions/   TaxIdException, InvalidTaxIdException
   Registry/     Registry, PhpRegistryLoader, CountryProfile, TaxIdScheme + data/countries.php
-  National/     84 check-digit validators + AbstractNationalValidator
+  National/     92 national verifiers + AbstractNationalValidator
   Resolver/     Resolver — validates, then consults a provider; never the other way round
   Providers/    NullProvider, ChainProvider (framework-free); ViesProvider, DatabaseProvider,
                  CachedProvider (CI4)
@@ -126,6 +129,7 @@ src/
   TaxId.php     public facade Daycry\TaxId\TaxId
 tests/          mirrors src/ (PHPUnit, CIUnitTestCase where CI4 is involved)
 docs/
+  README.md               documentation index and feature summaries
   api-reference.md        complete per-symbol API reference, code-verified
   usage.md                task-oriented guide: facade, helper, commands, providers, config
   countries.md            the coverage matrix — every country, scheme and whether it is checksummed

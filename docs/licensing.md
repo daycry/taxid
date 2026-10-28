@@ -1,15 +1,27 @@
-# Data authoring, licensing and privacy
+# Data, Licensing & Privacy
 
-Three decisions about the registry data, and the reasoning behind each.
+[Documentation Index](README.md) | [Package README](../README.md)
 
-## The rules are independently authored
+This guide describes registry provenance, example data and optional external lookups.
+
+- **License:** MIT for the package and its independently authored registry.
+- **Algorithm evidence:** National specifications and documented reference implementations.
+- **Example data:** Generated fixtures for validation, separate from live registration checks.
+- **External lookups:** Opt-in providers; the package ships no taxpayer database.
+
+---
+
+## The Rules Are Independently Authored
 
 `src/Registry/data/countries.php` was written from **publicly documented national formats and
 check-digit algorithms** — the sort of thing a tax authority publishes in a specification, a
 technical annex, or an invoicing guide.
 
-It is not copied from, nor derived from, any third-party dataset, library or scraped compilation.
-That matters twice over. Legally, a compiled dataset can carry its own licence even when the
+The registry is not imported wholesale from a third-party dataset or scraped compilation.
+Some arithmetic rules were cross-checked against reference implementations; those sources and
+verification limits are recorded in [algorithms.md](algorithms.md). PHP implementations and newly
+added synthetic fixtures are authored for this package. Source provenance matters for both
+maintainability and licensing. Legally, a compiled dataset can carry its own licence even when the
 underlying facts do not, and inheriting one silently would put an obligation on every consumer of
 this package. Practically, a copied dataset inherits its source's mistakes with no way to tell which
 entries were ever checked.
@@ -20,9 +32,13 @@ everything else.
 
 If you add a country, author it the same way. See [adding-a-country.md](adding-a-country.md).
 
-## The bundled examples are synthetic
+---
 
-Every `examples` entry is a value that is **checksum-valid but not a real taxpayer's identifier**.
+## The Bundled Examples Are Synthetic
+
+Generate examples to satisfy the supported format and checksum without sourcing taxpayer records.
+A mathematically valid generated value is not evidence of issuance, and generation does not
+guarantee that the same value has never been assigned. Treat examples as test fixtures only.
 
 This is deliberate, and it is the more important of the two reasons this file exists.
 
@@ -35,11 +51,13 @@ A synthetic value exercises exactly the same code path. The pattern, the length,
 the check digit are all tested identically; the only thing lost is the ability to say "this is
 Siemens's VAT number", which no test needs to say.
 
-The three exceptions are values that are **published as generic by the authority itself**: Mexico's
+Authority-published generic values and category ranges are also exercised: Mexico's
 `XAXX010101000` and `XEXX010101000` (the SAT's placeholder RFCs for unidentified counterparties), and
 the UK's `GD`/`HA` government and health-authority ranges. Those identify nobody.
 
-## No taxpayer data ships with the package
+---
+
+## No Taxpayer Data Ships with the Package
 
 `DatabaseProvider` reads a `tax_entities` table, the migration creates it **empty**, and
 `TaxEntitiesSeeder` inserts nothing.
@@ -51,6 +69,8 @@ answer lookups in production with fiction.
 
 So the table is yours to fill: cached VIES answers, your own customer master, or a register you hold
 a licence for. See [usage.md](usage.md#providers).
+
+---
 
 ## VIES
 
@@ -68,7 +88,9 @@ service. Three things to know before enabling it:
 Nothing about VIES is enabled by default. `Config\TaxId::$provider` is `'null'` out of the box, and
 no test in this repository touches the network.
 
-## Handling tax IDs in your own application
+---
+
+## Handling Tax IDs in Your Own Application
 
 Not this package's job to enforce, but worth saying once:
 
@@ -82,6 +104,8 @@ Not this package's job to enforce, but worth saying once:
   a list of identifiers. See [formatting.md](formatting.md).
 - Store the compact form, and think about whether you need to store it at all after the transaction
   it was collected for.
+
+---
 
 ## Licence
 

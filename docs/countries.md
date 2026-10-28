@@ -1,8 +1,16 @@
-# Country coverage
+# Country Coverage
 
-**94 jurisdictions, 146 schemes, 96 of them with a verified check digit.**
+[Documentation Index](README.md) | [Package README](../README.md)
 
-This table is maintained by hand, and kept honest by a test:
+**94 jurisdictions, 149 schemes, 101 of them with a verified check digit.**
+
+Use this matrix to select an identifier scheme and inspect its supported checks.
+
+- **Choose a type:** Pass the scheme code as the third argument to `validate()`.
+- **Inspect assurance:** Read `ValidationResult::checksumVerified` for the actual value.
+- **Check provenance:** See [Algorithm Sources & Limits](algorithms.md) for exceptions and evidence.
+
+The table is maintained alongside the registry.
 `tests/Registry/CountriesDocIsInSyncTest.php` compares every cell of every row against
 `src/Registry/data/countries.php` in both directions, checks the count line above, and checks the row
 order — so the two cannot drift without failing CI. Inside a CodeIgniter 4 application,
@@ -11,15 +19,17 @@ order — so the two cannot drift without failing CI. Inside a CodeIgniter 4 app
 Reading the table:
 
 - **Scheme** — the code you pass as the third argument to `validate()`, or as `--scheme` on the CLI.
-- **VAT** — whether the value doubles as the country's VAT number, so `vatNumber()` returns something.
+- **VAT** — whether the scheme serves as a VAT identifier. `vatNumber()` returns an international form only when the country also defines a VAT prefix.
 - **Entity** — `natural` (a person), `legal` (a company), `both` (the same scheme serves either).
-- **Checksum** — ✅ means a check digit is genuinely verified. **—** means the jurisdiction publishes
-  no verifier algorithm, so validation stops at length and structure; each such scheme carries a
-  `notes` entry in the registry saying why. See [algorithms.md](algorithms.md).
-- **Example** — a synthetic, checksum-valid value. Not a real taxpayer: see [licensing.md](licensing.md).
+- **Checksum** — ✅ means the scheme supports an arithmetic check. Some variants have exceptions;
+  `ValidationResult::checksumVerified` reports whether the complete checksum was checked for the
+  actual value. **—** means no checksum is implemented: validation uses length and structure, plus
+  reserved ranges where available (US). See [algorithms.md](algorithms.md).
+- **Example** — a validation fixture, not confirmation of a registered taxpayer: see [licensing.md](licensing.md).
 
-Where a country has several schemes they are listed in **registry order**, which is also detection
-order — the first structural match wins when you don't name a scheme.
+Countries with several schemes list them in **registry order**. Detection collects matching
+formats in that order; validation accepts the first candidate whose configured checks pass.
+Specify a scheme when a field requires one particular identifier type.
 
 | Country | Name | Scheme | Scheme name | Entity | VAT | Lengths | Checksum | Example |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -45,8 +55,9 @@ order — the first structural match wins when you don't name a scheme.
 | `BY` | Belarus | `unp` | УНП — Payer Account Number | both | ✅ | 9 | — | `100003234` |
 | `CA` | Canada | `bn` | BN — Business Number (and GST/HST account) | legal | ✅ | 9, 15 | ✅ | `123456782` |
 | `CA` | Canada | `sin` | SIN — Social Insurance Number | natural | — | 9 | ✅ | `130692544` |
-| `CH` | Switzerland | `mwst` | MWST/TVA/IVA — VAT number | legal | ✅ | 16 | ✅ | `CHE116281839MWST` |
+| `CH` | Switzerland | `mwst` | MWST/TVA/IVA — VAT number | legal | ✅ | 15, 16 | ✅ | `CHE116281839MWST` |
 | `CH` | Switzerland | `uid` | UID — Unternehmens-Identifikationsnummer | legal | — | 12 | ✅ | `CHE116281839` |
+| `CH` | Switzerland | `ahv` | AHV/AVS — OASI personal identification number | natural | — | 13 | ✅ | `7560000000019` |
 | `CL` | Chile | `rut` | RUT/RUN — Rol Único Tributario | both | ✅ | 8, 9 | ✅ | `123456785` |
 | `CN` | China | `uscc` | 统一社会信用代码 — Unified Social Credit Identifier | legal | ✅ | 18 | ✅ | `91350100M000100Y56` |
 | `CN` | China | `ric` | 居民身份证号码 — Resident identity card number | natural | — | 18 | ✅ | `110101199003070011` |
@@ -100,10 +111,10 @@ order — the first structural match wins when you don't name a scheme.
 | `IT` | Italy | `cf` | Codice fiscale | natural | — | 16 | ✅ | `RSSMRA85T10A562S` |
 | `IT` | Italy | `piva` | Partita IVA | legal | ✅ | 11 | ✅ | `00743110157` |
 | `JP` | Japan | `houjinbangou` | 法人番号 — Corporate Number | legal | ✅ | 13 | ✅ | `3700150000123` |
-| `JP` | Japan | `mynumber` | マイナンバー — Individual Number | natural | — | 12 | — | `123456789018` |
+| `JP` | Japan | `mynumber` | マイナンバー — Individual Number | natural | — | 12 | ✅ | `123456789018` |
 | `KE` | Kenya | `pin` | KRA PIN — Personal Identification Number | both | ✅ | 11 | — | `A123456789Z` |
 | `KR` | South Korea | `brn` | 사업자등록번호 — Business Registration Number | legal | ✅ | 10 | ✅ | `1234567891` |
-| `KZ` | Kazakhstan | `bin` | BIN/IIN — business or individual identification number | both | ✅ | 12 | — | `123456789012` |
+| `KZ` | Kazakhstan | `bin` | BIN/IIN — business or individual identification number | both | ✅ | 12 | ✅ | `123456789013` |
 | `LI` | Liechtenstein | `uid` | MWST-Nummer | legal | ✅ | 5 | — | `12345` |
 | `LT` | Lithuania | `pvm` | PVM mokėtojo kodas — VAT number | both | ✅ | 9, 12 | ✅ | `213179412` |
 | `LT` | Lithuania | `asmens_kodas` | Asmens kodas — personal code | natural | — | 11 | ✅ | `39001011237` |
@@ -114,9 +125,11 @@ order — the first structural match wins when you don't name a scheme.
 | `MA` | Morocco | `if` | IF — Identifiant Fiscal | both | ✅ | 7, 8 | — | `12345678` |
 | `MC` | Monaco | `tva` | TVA intracommunautaire (French system) | legal | ✅ | 11 | ✅ | `96552100554` |
 | `MC` | Monaco | `siren` | SIREN (French registry) | legal | — | 9 | ✅ | `552100554` |
-| `MD` | Moldova | `idno` | IDNO — state identification number | legal | ✅ | 13 | — | `1234567890123` |
+| `MD` | Moldova | `idno` | IDNO — state identification number | both | ✅ | 13 | ✅ | `1000000000018` |
+| `MD` | Moldova | `idnp` | IDNP — personal identification number | natural | — | 13 | ✅ | `2000000000015` |
 | `ME` | Montenegro | `pib` | PIB — Poreski identifikacioni broj | both | ✅ | 8 | — | `12345678` |
-| `MK` | North Macedonia | `edb` | ЕДБ — tax number | both | ✅ | 13 | — | `4030000375897` |
+| `MK` | North Macedonia | `embg` | ЕМБГ — personal identification number | natural | — | 13 | ✅ | `0101990410012` |
+| `MK` | North Macedonia | `edb` | ЕДБ — tax number | both | ✅ | 13 | ✅ | `4030000375897` |
 | `MT` | Malta | `vat` | VAT registration number | legal | ✅ | 8 | ✅ | `12345634` |
 | `MT` | Malta | `id_card` | Identity card number | natural | — | 8 | — | `0123456M` |
 | `MT` | Malta | `tin` | TIN — tax identification number (non-nationals) | natural | — | 9 | — | `123456789` |
@@ -157,12 +170,12 @@ order — the first structural match wins when you don't name a scheme.
 | `TN` | Tunisia | `mf` | MF — Matricule Fiscal | both | ✅ | 13 | — | `1234567ABC000` |
 | `TR` | Türkiye | `tckn` | T.C. Kimlik No — citizen number | natural | — | 11 | ✅ | `12345678950` |
 | `TR` | Türkiye | `vkn` | VKN — Vergi Kimlik Numarası | legal | ✅ | 10 | ✅ | `4540536920` |
-| `TW` | Taiwan | `ban` | Business Administration Number | legal | ✅ | 8 | — | `12345675` |
+| `TW` | Taiwan | `ban` | Business Administration Number | legal | ✅ | 8 | ✅ | `12345675` |
 | `UA` | Ukraine | `edrpou` | ЄДРПОУ — legal entity register code | legal | ✅ | 8 | — | `12345678` |
 | `UA` | Ukraine | `inn` | ІПН — individual taxpayer number | natural | — | 10 | — | `1234567890` |
-| `US` | United States | `itin` | ITIN — Individual Taxpayer Identification Number | natural | — | 9 | ✅ | `970512345` |
-| `US` | United States | `ein` | EIN — Employer Identification Number | legal | — | 9 | ✅ | `123456789` |
-| `US` | United States | `ssn` | SSN — Social Security Number | natural | — | 9 | ✅ | `123456789` |
+| `US` | United States | `itin` | ITIN — Individual Taxpayer Identification Number | natural | — | 9 | — | `970512345` |
+| `US` | United States | `ein` | EIN — Employer Identification Number | legal | — | 9 | — | `123456789` |
+| `US` | United States | `ssn` | SSN — Social Security Number | natural | — | 9 | — | `123456789` |
 | `UY` | Uruguay | `rut` | RUT — Registro Único Tributario | both | ✅ | 12 | ✅ | `211003420017` |
 | `VE` | Venezuela | `rif` | RIF — Registro Único de Información Fiscal | both | ✅ | 10 | ✅ | `J305329958` |
 | `VN` | Vietnam | `mst` | MST — Mã số thuế | both | ✅ | 10, 13 | — | `0101243150` |

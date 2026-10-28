@@ -1,7 +1,14 @@
 # Usage
 
-Everything below is verified against the test suite. If an example here disagrees with the code, the
-code is right and this file is a bug.
+[Documentation Index](README.md) | [Package README](../README.md)
+
+Use the facade, CodeIgniter service, helper or CLI to validate and inspect identifiers.
+
+- **Validate:** Choose the country and identifier type, then inspect the result.
+- **Parse and format:** Read scheme metadata and produce compact, printable or masked output.
+- **Resolve:** Configure an optional provider when taxpayer information is needed.
+
+---
 
 ## Contents
 
@@ -18,7 +25,9 @@ code is right and this file is a bug.
 - [spark commands](#spark-commands)
 - [Validating a form field](#validating-a-form-field)
 
-## The facade
+---
+
+## The Facade
 
 `Daycry\TaxId\TaxId` is the whole public API. It needs no container and no framework:
 
@@ -56,7 +65,57 @@ $taxid->scheme('ES', 'cif');                         // TaxIdScheme
 $taxid->country('ES');                               // CountryProfile
 ```
 
-## Naming the country — or not
+---
+
+## Naming the Country — or Not
+
+### Knowing What Was Checked
+
+```php
+$result = $taxid->validate('12345678Z', 'ES', 'nif');
+$result->scheme;             // 'nif'
+$result->checksumVerified;   // true
+
+$result = $taxid->validate('123456789', 'US', 'ein');
+$result->isValid();          // true: format/ranges accepted
+$result->checksumVerified;   // false: EIN has no checksum
+
+$result = $taxid->validate('12345678904', 'DE', 'idnr');
+$result->isValid();          // false: cannot fall back to Steuernummer
+$result->checksumVerified;   // null: validation failed
+```
+
+Always pass the third argument when the field requires one identifier type. Omitting
+it accepts any matching scheme, including those that check only structure. A true
+`checksumVerified` describes arithmetic verification, not whether a taxpayer exists.
+Use `resolve()` with a suitable provider for the separate registration outcome.
+
+The same metadata is returned by `taxid_validate()`. `taxid:validate --json` includes
+`checksum_verified` and the actual accepting `scheme`. Existing method signatures and
+two-argument construction of `ValidationResult` continue to work.
+
+Personal identifiers are distinct from business and VAT numbers:
+
+```php
+$taxid->validate('756.0000.0000.19', 'CH', 'ahv'); // Swiss AHV/AVS, EAN-13 control
+$taxid->validate('2000000000015', 'MD', 'idnp');  // Moldovan personal IDNP
+$taxid->validate('1000000000018', 'MD', 'idno');  // Organization/entrepreneur IDNO
+$taxid->validate('0101990410012', 'MK', 'embg');  // Macedonian personal EMBG
+$taxid->validate('4000000000013', 'MK', 'edb');   // Macedonian tax registration EDB
+```
+
+These are synthetic examples. For a Macedonian personal-ID field, always require `embg`:
+the broad `edb` scheme checks the checksum but does not interpret birth dates or personal
+registration regions. Both schemes reject an incorrect control digit, but only `embg`
+requires a valid personal date and region. See [algorithm sources and limitations](algorithms.md).
+
+Icelandic kennitala validation also checks its century marker and full calendar date.
+Norwegian personal-ID validation checks the calendar against the published year/serial
+allocation ranges. It distinguishes 1900 from 2000 leap-day cases and keeps D-number day
+offsets. For pre-2000 D-numbers, 1900 is used for calendar validation; the exact older birth
+century is not exposed. This does not implement the new 2032 checksum.
+
+### Supplying the Country
 
 The value comes first and the country is optional:
 
@@ -79,7 +138,9 @@ fiscale that happens to start `IT` is left alone, because the whole value alread
 Under CodeIgniter you can set `Config\TaxId::$defaultCountry` and let the helper apply it — see
 [The helper](#the-helper).
 
-## The twelve violation codes
+---
+
+## The Twelve Violation Codes
 
 `validate()` runs a fixed sequence and returns on the **first** failure. The code is part of the
 public API: branch on it rather than on the message.
@@ -113,7 +174,9 @@ $result->firstViolation()->messageKey;   // 'taxid.violation.check_digit_failed'
 arithmetically fine but was never issued — `111.111.111-11` as a Brazilian CPF, or a US SSN starting
 `000`. Those are usually placeholder data rather than typos, and deserve a different message.
 
-## Countries with more than one scheme
+---
+
+## Countries with More Than One Scheme
 
 Some countries issue several kinds of tax ID, and their formats overlap. Germany's eleven-digit IdNr
 and its ten-to-thirteen-digit Steuernummer are both plausible readings of eleven digits; a US EIN and
@@ -135,6 +198,8 @@ $taxid->validate('12345678Z', 'ES', 'cif')->error();
 ```
 
 `$taxid->schemes('ES')` lists a country's schemes in detection order.
+
+---
 
 ## Parsing
 
@@ -167,7 +232,7 @@ try {
 A `ParsedTaxId` can be passed back into `validate()`, `isValid()`, `format()` and `resolve()` without
 repeating the country — it already knows.
 
-### VAT numbers
+### VAT Numbers
 
 ```php
 $taxid->parse('B12345674', 'ES')->vatNumber();   // 'ESB12345674'
@@ -175,6 +240,8 @@ $taxid->parse('094259216', 'GR')->vatNumber();   // 'EL094259216'
 $taxid->parse('11144477735', 'BR')->vatNumber(); // null — a CPF is not a VAT number
 $taxid->parse('51824753556', 'AU')->vatNumber(); // null — Australia quotes no prefix
 ```
+
+---
 
 ## Formatting
 
@@ -195,7 +262,9 @@ enough to reconstruct it.
 Formatting never throws: an unparseable value comes back normalized rather than raising, because
 templates format before they validate.
 
-## Resolving a taxpayer
+---
+
+## Resolving a Taxpayer
 
 ```php
 $result = $taxid->resolve('ESB12345674');
@@ -209,7 +278,7 @@ $result->entity();         // ?EntityInfo
 $result->validation();     // ValidationResult
 ```
 
-### `null` is not `false`
+### `null` Is Not `false`
 
 `isRegistered()` has three states and conflating two of them is the most likely way to misuse this
 package:
@@ -239,6 +308,8 @@ if ($result->isRegistered() === null) {
 An invalid value never reaches a provider at all: `resolve()` validates first, and returns with
 `taxId() === null` and the reason in `validation()`.
 
+---
+
 ## Providers
 
 | Provider | Framework | What it does |
@@ -265,7 +336,7 @@ use Daycry\TaxId\Registry\Registry;
 $taxid = new TaxId(new Registry(), new ChainProvider([$myProvider, $myFallback]));
 ```
 
-### VIES, in practice
+### VIES, in Practice
 
 VIES is a free public service that forwards each query to the issuing member state. It is slow,
 aggressively rate-limited, and individual member states go offline for maintenance. Three
@@ -281,7 +352,7 @@ being sent.
 Traders may opt out of name disclosure, in which case VIES returns `---`. That becomes `null` here,
 not a company called "---".
 
-### Writing your own provider
+### Writing Your Own Provider
 
 ```php
 use Daycry\TaxId\Contracts\LookupProviderInterface;
@@ -309,6 +380,8 @@ source can genuinely tell those apart — a database that is merely incomplete c
 
 Point `Config\TaxId::$provider` at the class name.
 
+---
+
 ## `Config\TaxId`
 
 `php spark taxid:publish` writes `app/Config/TaxId.php` as a subclass, so anything you don't override
@@ -333,7 +406,9 @@ taxid.cacheTtl = 86400
 taxid.defaultCountry = ES
 ```
 
-## The helper
+---
+
+## The Helper
 
 ```php
 helper('taxid');
@@ -357,7 +432,9 @@ once.
 | `vat_number($taxId, $country = null)` | `?string` |
 | `vat_is_registered($taxId, $country = null)` | `?bool` — three-state |
 
-## spark commands
+---
+
+## Spark Commands
 
 ```bash
 # Validate. Exit 0 valid, 1 invalid.
@@ -387,7 +464,9 @@ php spark taxid:publish [--force]
 `taxid:lookup` exiting 0 on "unknown" is deliberate: a script must be able to tell a bad number from
 a service outage, and only the former should fail a pipeline.
 
-## Validating a form field
+---
+
+## Validating a Form Field
 
 ```php
 use Daycry\TaxId\Enums\ViolationCode;

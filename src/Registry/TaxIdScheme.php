@@ -33,6 +33,7 @@ final readonly class TaxIdScheme
      * @param array{0: int, 1: int}|null                      $checkDigitOffset `[offset, length]` of the check character(s) within the compact form; a negative offset counts from the end.
      * @param string[]                                        $examples        Valid values, exercised end-to-end by the data-integrity test.
      * @param string|null                                     $notes           Anything a consumer should know (issuing body, quirks, why there is no checksum).
+     * @param bool                                            $checksum        Whether the verifier performs arithmetic rather than only structural/range checks.
      */
     public function __construct(
         public string $countryCode,
@@ -47,6 +48,7 @@ final readonly class TaxIdScheme
         public ?array $checkDigitOffset = null,
         public array $examples = [],
         public ?string $notes = null,
+        public bool $checksum = true,
     ) {
     }
 
@@ -61,7 +63,7 @@ final readonly class TaxIdScheme
 
     public function hasCheckDigit(): bool
     {
-        return $this->checkDigitClass !== null;
+        return $this->checkDigitClass !== null && $this->checksum;
     }
 
     /**

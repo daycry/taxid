@@ -76,15 +76,15 @@ class Services extends BaseService
      */
     public static function config(): TaxIdConfig
     {
-        $config = Factories::get('config', 'TaxId');
+        foreach (['TaxId', TaxIdConfig::class] as $alias) {
+            $config = Factories::get('config', $alias);
 
-        if ($config instanceof TaxIdConfig) {
-            return $config;
+            if ($config instanceof TaxIdConfig) {
+                return $config;
+            }
         }
 
-        $config = Factories::get('config', TaxIdConfig::class);
-
-        return $config instanceof TaxIdConfig ? $config : new TaxIdConfig();
+        return new TaxIdConfig();
     }
 
     private static function buildProvider(TaxIdConfig $config): LookupProviderInterface

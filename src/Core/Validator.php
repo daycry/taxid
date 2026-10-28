@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Daycry\TaxId\Core;
 
+use Daycry\TaxId\Contracts\ChecksumAwareValidatorInterface;
 use Daycry\TaxId\Contracts\ReservedValueDetectorInterface;
 use Daycry\TaxId\Contracts\ValidatorInterface;
 use Daycry\TaxId\DTO\ParsedTaxId;
@@ -209,7 +210,21 @@ final class Validator implements ValidatorInterface
             $failure = $this->rejectionFor($candidate, $detection->compact);
 
             if ($failure === null) {
-                return new AnalysisResult(new ValidationResult(true, []), $detection, $candidate);
+                $checksum = $candidate->hasCheckDigit();
+
+                if ($checksum && $candidate->checkDigitClass !== null) {
+                    $validator = $this->validators->make($candidate->checkDigitClass);
+
+                    if ($validator instanceof ChecksumAwareValidatorInterface) {
+                        $checksum = $validator->hasChecksum($detection->compact);
+                    }
+                }
+
+                return new AnalysisResult(
+                    new ValidationResult(true, [], $checksum, $candidate->code),
+                    $detection,
+                    $candidate,
+                );
             }
 
             $firstFailure ??= $failure;
