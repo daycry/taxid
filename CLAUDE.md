@@ -11,8 +11,8 @@ formatting and taxpayer resolution — that is also usable **standalone**, outsi
 - PHP `^8.3`. CodeIgniter 4 `^4.6` is a **dev-only peer dependency** (`require-dev`), never a hard
   `require` — the core works with CI4 not installed at all. The only runtime extension required is
   `ext-simplexml` (the VIES SOAP response parser).
-- **Current release: v1.3.0.** 94 jurisdictions, 149 schemes, 92 national verifiers;
-  101 schemes support arithmetic checksums. US range verifiers are excluded from that count.
+- **Current release: v1.4.0.** 94 jurisdictions, 150 schemes, 93 national verifiers;
+  102 schemes support arithmetic checksums. US range verifiers are excluded from that count.
   `ValidationResult::checksumVerified` reports the per-value outcome, including exceptional
   formats without a complete checksum. PHPStan level 8 (`src` + `tests`), PSR-12.
   Trust `composer test`'s output for test and assertion counts.
@@ -61,7 +61,7 @@ When you add or change a country, you are editing *data*, and the integrity test
   (`final`, carries the `ValidationResult` via `result()`).
 - `src/Registry` — `Registry`, `PhpRegistryLoader`, `CountryProfile`, `TaxIdScheme` +
   `data/countries.php`.
-- `src/National` — 92 national verifiers, all extending `AbstractNationalValidator`.
+- `src/National` — 93 national verifiers, all extending `AbstractNationalValidator`.
 - `src/Resolver` — `Resolver`.
 
 **Framework-free but living in an un-guarded directory** (guarded individually by the architecture
@@ -116,7 +116,7 @@ src/
   Enums/        ViolationCode (12 cases), EntityType, TaxIdFormat
   Exceptions/   TaxIdException, InvalidTaxIdException
   Registry/     Registry, PhpRegistryLoader, CountryProfile, TaxIdScheme + data/countries.php
-  National/     92 national verifiers + AbstractNationalValidator
+  National/     93 national verifiers + AbstractNationalValidator
   Resolver/     Resolver — validates, then consults a provider; never the other way round
   Providers/    NullProvider, ChainProvider (framework-free); ViesProvider, DatabaseProvider,
                  CachedProvider (CI4)

@@ -29,7 +29,7 @@
 
 A tax identification number library for **CodeIgniter 4**, with a framework-free core for standalone PHP applications.
 
-Validate, parse and format identifiers across **94 jurisdictions and 149 schemes**, including NIF, CIF, VAT, CPF, CNPJ, RFC, AHV/AVS, IDNO, IDNP, EMBG and EDB. **101 schemes support arithmetic checksums**; each validation result reports what was actually checked.
+Validate, parse and format identifiers across **94 jurisdictions and 150 schemes**, including NIF, CIF, VAT, CPF, CNPJ, RFC, AHV/AVS, IDNO, IDNP, JMBG, EMBG and EDB. **102 schemes support arithmetic checksums**; each validation result reports what was actually checked.
 
 ```bash
 composer require daycry/taxid
@@ -43,8 +43,8 @@ composer require daycry/taxid
 
 | Feature | Description |
 |---------|-------------|
-| **Country Registry** | 94 jurisdictions and 149 identifier schemes, with entity types, formats and examples |
-| **Checksum Verification** | 101 schemes with national algorithms, including mod-11, mod-97, Luhn, Verhoeff, EAN-13 and ISO 7064 |
+| **Country Registry** | 94 jurisdictions and 150 identifier schemes, with entity types, formats and examples |
+| **Checksum Verification** | 102 schemes with national algorithms, including mod-11, mod-97, Luhn, Verhoeff, EAN-13 and ISO 7064 |
 | **Validation Assurance** | `checksumVerified` distinguishes a checked checksum from accepted structure/ranges |
 | **Explicit Scheme Selection** | Require a specific type such as `nif`, `ahv`, `idnp`, `embg` or `edb` |
 | **Country Inference** | Detect recognized country/VAT prefixes, including Greece's `EL` and Northern Ireland's `XI` |
@@ -111,6 +111,7 @@ $taxid->isValid('ESB12345674');                   // true: country inferred
 $taxid->isValid('756.1234.5678.97', 'CH', 'ahv'); // true: Swiss personal identifier
 $taxid->isValid('1000000000018', 'MD', 'idno');   // true: Moldovan organization ID
 $taxid->isValid('2000000000015', 'MD', 'idnp');   // true: Moldovan personal ID
+$taxid->isValid('0101990260010', 'ME', 'jmbg');   // true: Montenegrin personal ID
 $taxid->isValid('0101990410012', 'MK', 'embg');   // true: Macedonian personal ID
 $taxid->isValid('4000000000013', 'MK', 'edb');    // true: Macedonian tax registration
 ```
@@ -246,7 +247,7 @@ Start with the **[Documentation Index](docs/README.md)** for guides and feature 
 |---------|-------------|
 | [Usage Guide](docs/usage.md) | Facade, validation assurance, helpers, CLI, providers and configuration |
 | [API Reference](docs/api-reference.md) | Public methods, DTOs, contracts and extension points |
-| [Country Coverage](docs/countries.md) | All 94 jurisdictions and 149 identifier schemes |
+| [Country Coverage](docs/countries.md) | All 94 jurisdictions and 150 identifier schemes |
 | [Algorithm Sources & Limits](docs/algorithms.md) | Checksums, exceptional variants and verification provenance |
 | [Formatting](docs/formatting.md) | Compact, print and anonymized output, with mask examples |
 | [Adding a Country](docs/adding-a-country.md) | Registry entries, validators and required checks |

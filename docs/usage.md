@@ -99,6 +99,7 @@ Personal identifiers are distinct from business and VAT numbers:
 ```php
 $taxid->validate('756.0000.0000.19', 'CH', 'ahv'); // Swiss AHV/AVS, EAN-13 control
 $taxid->validate('2000000000015', 'MD', 'idnp');  // Moldovan personal IDNP
+$taxid->validate('0101990260010', 'ME', 'jmbg');  // Montenegrin personal JMBG
 $taxid->validate('1000000000018', 'MD', 'idno');  // Organization/entrepreneur IDNO
 $taxid->validate('0101990410012', 'MK', 'embg');  // Macedonian personal EMBG
 $taxid->validate('4000000000013', 'MK', 'edb');   // Macedonian tax registration EDB

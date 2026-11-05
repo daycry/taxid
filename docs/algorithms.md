@@ -4,7 +4,7 @@
 
 What each bundled check digit actually is, and — just as important — where the gaps are.
 
-Of 149 schemes, **101 support an arithmetic checksum**. The other 48 validate structure and,
+Of 150 schemes, **102 support an arithmetic checksum**. The other 48 validate structure and,
 where available, reserved ranges. Some accepted variants lack a complete checksum;
 `ValidationResult::checksumVerified` identifies these for each successful value. This file
 says which is which and why, because "no checksum" is a meaningful limitation and hiding it would be
@@ -77,6 +77,7 @@ The two mod-11 conventions are worth knowing apart, since the same modulus produ
 | LV | `vat` | Weights `9148310257 6` with the documented `9…`/remainder-4 correction. Person-shaped codes fall through to the personal-code scheme. |
 | LV | `personas_kods` | `(1101 − sum) mod 11 mod 10`. |
 | MD | `idno`, `idnp` | The first twelve digits weighted `731731731731`, sum mod 10 equals the final digit. IDNO starts with 1; IDNP starts with 2 or legacy 09. |
+| ME | `jmbg` | Weights `765432765432`, mod-11 complement; remainder 0 gives control 0, remainder 1 is unissuable. Checks calendar date and domestic registration regions 21–29. |
 | MK | `embg` | Weights `765432765432`, mod-11 complement with 10/11 written as 0. Checks calendar date and domestic regions 41–49 or foreign-resident region 04. |
 | MK | `edb` | Weights `765432765432`, mod-11 complement with 10/11 written as 0. No personal date/region interpretation; the all-zero placeholder is rejected. |
 | MT | `vat` | Weights `346789` over six digits, `37 − (sum mod 37)`. |
@@ -168,6 +169,28 @@ uncertain, this package does not guess.
 | `SG/uen`, `GT/nit` | Checksum not implemented; further source verification is needed before enforcing it. |
 | `KR` personal numbers | Not bundled; these are legally restricted personal identifiers. |
 | AD, AE, AL, AM, AZ, BA, BO, BY, CR, DZ, EG, GE, HK, HN, ID, KE, LI, MA, ME, MY, NG, NI, PA, PH, PK, SA, SV, TH, TN, VN | No checksum implemented in this package; this is not a claim that no public algorithm exists. |
+
+### Sources and Limits for Montenegro JMBG
+
+- **Weights and remainder one:** Montenegro's [checksum regulation, articles 2–3](https://wapi.gov.me/download/0877efd1-4ca1-44d9-9794-fde9d91812ae?version=1.0)
+  specifies weights `765432765432`. If the remainder is 1, the issuing authority increments
+  the serial and recalculates; validation rejects the supplied body instead of changing it
+  or accepting a zero control.
+- **Remainder zero:** that regulation does not explicitly describe this case. Control 0 follows
+  the shared JMBG convention documented in [REGOS's official validation algorithm](https://regos.hr/app/uploads/2018/07/algoritmiobrazacr-s.pdf).
+  REGOS is a Croatian authority; this is corroboration of the common algorithm, not a claim
+  that Montenegro's regulation explicitly states the zero convention.
+- **Registration regions:** the [Montenegrin registration-area regulation, articles 2–3](https://wapi.gov.me/download/bd322e14-ffd1-41c5-a40f-321c05a94887?version=1.0)
+  defines domestic codes 21–29. This scheme covers those codes; foreign-resident codes
+  and identifiers allocated by other former Yugoslav republics are outside its scope.
+- **Calendar interpretation:** the three-digit year uses the same convention as the bundled
+  EMBG validator (800–999 → 1800–1999; 000–799 → 2000–2799). The full calendar date is checked,
+  without an age, future-date or live-registration check. No date, region, municipality or sex
+  is exposed as additional personal metadata.
+
+The existing eight-digit `ME/pib` remains a separate structural-only scheme. New documentation
+and fixtures use independently calculated synthetic identifiers. Validation does not establish
+that a number has been issued or that a person is registered as a taxpayer.
 
 ### Sources for the 2026-10 Validation Expansion
 
