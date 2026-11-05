@@ -147,10 +147,10 @@ and provides none.
 | Area | Current State |
 |------|---------------|
 | Jurisdictions | 94 |
-| Identifier schemes | 149 |
-| Schemes with arithmetic checksums | 101; some variants have exceptions |
+| Identifier schemes | 150 |
+| Schemes with arithmetic checksums | 102; some variants have exceptions |
 | Structure/range-only schemes | 48 |
-| National verifiers | 92 |
+| National verifiers | 93 |
 | Static analysis | PHPStan level 8 over source and tests |
 | Style | PSR-12 with the repository PHP-CS-Fixer rules |
 | Test isolation | No network requests in the test suite |

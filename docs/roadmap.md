@@ -6,6 +6,13 @@ Current development and release history for Daycry TaxId. See [CHANGELOG.md](../
 
 ---
 
+## v1.4 — Shipped (2026-11-05)
+
+- **Montenegro:** personal `ME/jmbg` alongside the existing PIB; calendar date, domestic regions 21–29 and mod-11 control, with remainder 1 rejected.
+- **Coverage:** 94 jurisdictions, 150 schemes and 102 schemes with arithmetic checksum support.
+
+---
+
 ## v1.3 — Shipped (2026-10-28)
 
 - **Coverage:** 94 jurisdictions, 149 schemes and 101 schemes with arithmetic checksum support.

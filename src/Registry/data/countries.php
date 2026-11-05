@@ -60,6 +60,7 @@ use Daycry\TaxId\National\LuVatValidator;
 use Daycry\TaxId\National\LvPersonalCodeValidator;
 use Daycry\TaxId\National\LvVatValidator;
 use Daycry\TaxId\National\MdIdnValidator;
+use Daycry\TaxId\National\MeJmbgValidator;
 use Daycry\TaxId\National\MkEdbValidator;
 use Daycry\TaxId\National\MkEmbgValidator;
 use Daycry\TaxId\National\MtVatValidator;
@@ -1614,6 +1615,18 @@ return [
                 'lengths'  => [8],
                 'examples' => ['12345678'],
                 'notes'    => 'No public check-digit algorithm.',
+            ],
+            [
+                'code' => 'jmbg',
+                'name' => 'JMBG — Jedinstveni matični broj građana',
+                'entity' => 'natural',
+                'vat' => false,
+                'pattern' => '/^[0-9]{7}2[1-9][0-9]{4}\z/',
+                'lengths' => [13],
+                'check_digit' => MeJmbgValidator::class,
+                'check_digit_offset' => [-1, 1],
+                'examples' => ['0101990210013', '0101990260010'],
+                'notes' => 'Personal JMBG: calendar date, domestic region 21-29 and mod-11 control. Remainder 1 is unissuable, not folded to zero. Foreign-resident codes are not covered.',
             ],
         ],
     ],

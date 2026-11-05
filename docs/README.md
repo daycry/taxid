@@ -24,7 +24,7 @@ Validation, parsing, formatting and optional taxpayer resolution for **CodeIgnit
 
 ### [Country Coverage](countries.md)
 
-- **94 jurisdictions**, **149 schemes** and **101 schemes with checksum support**.
+- **94 jurisdictions**, **150 schemes** and **102 schemes with checksum support**.
 - Entity types, VAT capability, compact lengths and examples.
 - Personal and business identifiers, including CH AHV/AVS, MD IDNO/IDNP and MK EMBG/EDB.
 
@@ -80,7 +80,7 @@ Validation, parsing, formatting and optional taxpayer resolution for **CodeIgnit
 | Feature | Availability |
 |---------|--------------|
 | Offline format and scheme validation | All registered schemes |
-| Arithmetic checksum support | 101 of 149 schemes; some variants have exceptions |
+| Arithmetic checksum support | 102 of 150 schemes; some variants have exceptions |
 | Per-value validation assurance | `ValidationResult::checksumVerified` and `scheme` |
 | Compact, print and anonymized formats | Framework-free core |
 | Country detection | Recognized prefixes; unprefixed values require a country |

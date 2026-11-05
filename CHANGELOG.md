@@ -12,6 +12,20 @@ the old behaviour was a bug. Such corrections are always called out here by name
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-05
+
+### Added
+
+- Personal `ME/jmbg` validation for Montenegro: thirteen digits, a valid calendar date,
+  domestic registration regions 21–29 and a mod-11 checksum. Remainder 0 requires control 0;
+  remainder 1 is rejected rather than folded to zero. The existing eight-digit PIB is unchanged.
+  The registry now contains 150 schemes, with 102 supporting arithmetic checksums.
+
+### Changed
+
+- README title now describes tax ID validation for CodeIgniter 4 and standalone PHP;
+  coverage counts, examples and algorithm provenance include Montenegro's personal JMBG.
+
 ## [1.3.0] - 2026-10-28
 
 ### Added
@@ -225,7 +239,8 @@ the reasoning:
 - The country is never guessed from an unprefixed value. A nine-digit number is a plausible tax ID in
   dozens of jurisdictions, so `CountryRequired` is the honest answer.
 
-[Unreleased]: https://github.com/daycry/taxid/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/daycry/taxid/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/daycry/taxid/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/daycry/taxid/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/daycry/taxid/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/daycry/taxid/compare/v1.0.0...v1.1.0
