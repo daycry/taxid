@@ -2,7 +2,7 @@
 
 [Documentation Index](README.md) | [Package README](../README.md)
 
-**94 jurisdictions, 149 schemes, 101 of them with a verified check digit.**
+**94 jurisdictions, 150 schemes, 102 of them with a verified check digit.**
 
 Use this matrix to select an identifier scheme and inspect its supported checks.
 
@@ -128,6 +128,7 @@ Specify a scheme when a field requires one particular identifier type.
 | `MD` | Moldova | `idno` | IDNO — state identification number | both | ✅ | 13 | ✅ | `1000000000018` |
 | `MD` | Moldova | `idnp` | IDNP — personal identification number | natural | — | 13 | ✅ | `2000000000015` |
 | `ME` | Montenegro | `pib` | PIB — Poreski identifikacioni broj | both | ✅ | 8 | — | `12345678` |
+| `ME` | Montenegro | `jmbg` | JMBG — Jedinstveni matični broj građana | natural | — | 13 | ✅ | `0101990210013` |
 | `MK` | North Macedonia | `embg` | ЕМБГ — personal identification number | natural | — | 13 | ✅ | `0101990410012` |
 | `MK` | North Macedonia | `edb` | ЕДБ — tax number | both | ✅ | 13 | ✅ | `4030000375897` |
 | `MT` | Malta | `vat` | VAT registration number | legal | ✅ | 8 | ✅ | `12345634` |
