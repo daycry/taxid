@@ -143,7 +143,7 @@ Specify a scheme when a field requires one particular identifier type.
 | `NO` | Norway | `mva` | MVA-nummer — VAT number | legal | ✅ | 12 | ✅ | `974760673MVA` |
 | `NO` | Norway | `orgnr` | Organisasjonsnummer | legal | — | 9 | ✅ | `974760673` |
 | `NO` | Norway | `fodselsnummer` | Fødselsnummer — national identity number | natural | — | 11 | ✅ | `01019012480` |
-| `NZ` | New Zealand | `ird` | IRD number | both | ✅ | 8, 9 | ✅ | `490918507` |
+| `NZ` | New Zealand | `ird` | IRD number | both | ✅ | 8, 9 | ✅ | `136410132` |
 | `PA` | Panama | `ruc` | RUC — Registro Único de Contribuyentes | both | ✅ | 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 | — | `155646463225` |
 | `PE` | Peru | `ruc` | RUC — Registro Único de Contribuyentes | both | ✅ | 11 | ✅ | `20100070970` |
 | `PH` | Philippines | `tin` | TIN — Taxpayer Identification Number | both | ✅ | 9, 10, 11, 12 | — | `123456789` |
@@ -159,7 +159,7 @@ Specify a scheme when a field requires one particular identifier type.
 | `RU` | Russia | `inn` | ИНН — Taxpayer Identification Number | both | ✅ | 10, 12 | ✅ | `7707083893` |
 | `SA` | Saudi Arabia | `vat` | VAT registration number | both | ✅ | 15 | — | `300000000000003` |
 | `SE` | Sweden | `vat` | Momsregistreringsnummer — VAT number | legal | ✅ | 12 | ✅ | `556036079301` |
-| `SE` | Sweden | `personnummer` | Personnummer | natural | — | 12 | ✅ | `198001011231` |
+| `SE` | Sweden | `personnummer` | Personnummer | natural | — | 10, 12 | ✅ | `198001011231` |
 | `SE` | Sweden | `orgnr` | Organisationsnummer | legal | — | 10 | ✅ | `5560360793` |
 | `SG` | Singapore | `uen` | UEN — Unique Entity Number | legal | ✅ | 9, 10 | — | `53012345A` |
 | `SI` | Slovenia | `vat` | Davčna številka — tax number | both | ✅ | 8 | ✅ | `15012557` |

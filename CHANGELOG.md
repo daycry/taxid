@@ -12,6 +12,18 @@ the old behaviour was a bug. Such corrections are always called out here by name
 
 ## [Unreleased]
 
+### Fixed
+
+- `NZ/ird`: the issued range (10,000,000–150,000,000) is now checked against the whole number,
+  check digit included, as Inland Revenue specifies. It was checked against the base without the
+  check digit, which rejected every valid eight-digit IRD number and let checksum-valid values
+  above 150,000,000 through. The bundled example `490918507` was itself out of range and is
+  replaced by `136410132`.
+- `SE/orgnr` and `SE/personnummer`: a ten-digit value is now read by its third digit — 0 or 1
+  (a month) for a personnummer, 2 or more for an organisationsnummer. A ten-digit personnummer
+  used to be accepted as an `orgnr` and reported as a legal entity; it now resolves to
+  `personnummer`, and requiring `orgnr` for it fails.
+
 ## [1.4.0] - 2026-11-05
 
 ### Added
