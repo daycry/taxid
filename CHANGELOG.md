@@ -12,6 +12,8 @@ the old behaviour was a bug. Such corrections are always called out here by name
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-11-09
+
 ### Fixed
 
 - `NZ/ird`: the issued range (10,000,000–150,000,000) is now checked against the whole number,
@@ -251,7 +253,8 @@ the reasoning:
 - The country is never guessed from an unprefixed value. A nine-digit number is a plausible tax ID in
   dozens of jurisdictions, so `CountryRequired` is the honest answer.
 
-[Unreleased]: https://github.com/daycry/taxid/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/daycry/taxid/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/daycry/taxid/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/daycry/taxid/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/daycry/taxid/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/daycry/taxid/compare/v1.1.0...v1.2.0
