@@ -64,7 +64,9 @@ final class AmericasAndAsiaValidatorsTest extends TestCase
         yield 'AU ACN' => ['AU', 'acn', ['004085616'], ['004085617']];
         yield 'AU TFN' => ['AU', 'tfn', ['123456782'], ['123456783']];
 
-        yield 'NZ IRD' => ['NZ', 'ird', ['490918507'], ['490918508']];
+        // The 10,000,000-150,000,000 range applies to the whole number, so an
+        // eight-digit IRD is in range and a checksum-valid 151,000,002 is not.
+        yield 'NZ IRD' => ['NZ', 'ird', ['136410132', '49091850', '35901981'], ['136410133', '151000002', '490918507']];
 
         yield 'IL company' => ['IL', 'hp', ['512345679'], ['512345678']];
         yield 'IL ID'      => ['IL', 'id', ['123456782'], ['123456783']];

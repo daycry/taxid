@@ -573,6 +573,21 @@ final class EuropeValidatorsTest extends TestCase
     }
 
     /**
+     * A Swedish organisationsnummer always has a third digit of at least 2 — its
+     * "month" is 20 or more — while a ten-digit personnummer carries a real month
+     * there. Both are Luhn-valid, so only that digit keeps a person's number from
+     * reading as a legal entity's.
+     */
+    public function testSwedishTenDigitPersonnummerIsNotAnOrganisationsnummer(): void
+    {
+        self::assertSame('personnummer', $this->taxid->parse('8803200016', 'SE')->scheme);
+        self::assertSame('orgnr', $this->taxid->parse('5560360793', 'SE')->scheme);
+
+        self::assertFalse($this->taxid->isValid('8803200016', 'SE', 'orgnr'));
+        self::assertFalse($this->taxid->isValid('5560360793', 'SE', 'personnummer'));
+    }
+
+    /**
      * The month field carries the sex: women's numbers add 50, and since 2004 a
      * further 20 when a day's serials run out. So 51 is January and must be
      * accepted, while 63 reduces to month 13 and must not be — both values below

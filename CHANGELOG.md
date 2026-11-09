@@ -12,6 +12,20 @@ the old behaviour was a bug. Such corrections are always called out here by name
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-11-09
+
+### Fixed
+
+- `NZ/ird`: the issued range (10,000,000–150,000,000) is now checked against the whole number,
+  check digit included, as Inland Revenue specifies. It was checked against the base without the
+  check digit, which rejected every valid eight-digit IRD number and let checksum-valid values
+  above 150,000,000 through. The bundled example `490918507` was itself out of range and is
+  replaced by `136410132`.
+- `SE/orgnr` and `SE/personnummer`: a ten-digit value is now read by its third digit — 0 or 1
+  (a month) for a personnummer, 2 or more for an organisationsnummer. A ten-digit personnummer
+  used to be accepted as an `orgnr` and reported as a legal entity; it now resolves to
+  `personnummer`, and requiring `orgnr` for it fails.
+
 ## [1.4.0] - 2026-11-05
 
 ### Added
@@ -239,7 +253,8 @@ the reasoning:
 - The country is never guessed from an unprefixed value. A nine-digit number is a plausible tax ID in
   dozens of jurisdictions, so `CountryRequired` is the honest answer.
 
-[Unreleased]: https://github.com/daycry/taxid/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/daycry/taxid/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/daycry/taxid/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/daycry/taxid/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/daycry/taxid/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/daycry/taxid/compare/v1.1.0...v1.2.0

@@ -37,7 +37,8 @@ final class NzIrdValidator extends AbstractNationalValidator
         $base  = str_pad(substr($compact, 0, -1), 8, '0', STR_PAD_LEFT);
         $check = (int) $compact[$length - 1];
 
-        $value = (int) $base;
+        // The issued range is defined on the whole number, check digit included.
+        $value = (int) $compact;
 
         if ($value < 10000000 || $value > 150000000) {
             return false;

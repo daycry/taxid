@@ -95,7 +95,7 @@ The two mod-11 conventions are worth knowing apart, since the same modulus produ
 | RO | `cnp` | Weights `279146358279`, remainder 10 → 1. |
 | RS | `pib` | ISO 7064 MOD 11,10. |
 | RU | `inn` | Weighted mod-11-mod-10; the 12-digit form carries two independent check digits. |
-| SE | `orgnr`, `vat`, `personnummer` | Luhn over the ten-digit core. |
+| SE | `orgnr`, `vat`, `personnummer` | Luhn over the ten-digit core. A ten-digit value with third digit 0–1 is a personnummer, 2–9 an orgnr. |
 | SI | `vat` | Weights 8…2, `11 − r`, 10 → 0, 11 invalid. |
 | SK | `vat` | No check digit: the whole ten-digit number must be divisible by 11, third digit in `234789`. |
 | SK | `ico` | Identical to the Czech IČO — a shared Czechoslovak standard. |
@@ -141,7 +141,7 @@ The two mod-11 conventions are worth knowing apart, since the same modulus produ
 | JP | `mynumber` | Last digit: mod-11 complement of eleven digits weighted `6 5 4 3 2 7 6 5 4 3 2`; remainders 0 and 1 produce 0. |
 | KR | `brn` | Weights `137137135`, plus the ninth digit's carry from `×5 ÷ 10`, closed mod 10. |
 | KZ | `bin` (BIN/IIN) | Weights 1…11, mod-11; remainder 10 retries with `3 4 5 6 7 8 9 10 11 1 2`. A second 10 is unissuable. Dates and entity categories are not inferred. |
-| NZ | `ird` | Weights `32765432`, retried with `74325276` when the first pass demands a 10. |
+| NZ | `ird` | Weights `32765432`, retried with `74325276` when the first pass demands a 10. The whole number, check digit included, must lie in 10,000,000–150,000,000. |
 | TW | `ban` | Weights `1 2 1 2 1 2 4 1`, each product digit-summed, total divisible by **5** under the 2023 expansion. If the seventh digit is 7, total +1 may instead be divisible by 5. |
 
 ---
